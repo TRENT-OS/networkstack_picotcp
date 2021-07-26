@@ -21,6 +21,22 @@ function(NetworkStack_PicoTcp_DeclareCAmkESComponent
     name
 )
 
+    # Let caller append to any of the build options with his own variables
+    cmake_parse_arguments(
+        PARSE_ARGV
+        1
+        NETWORKSTACK_EXTRA
+        ""
+        ""
+        "C_FLAGS"
+    )
+
+    if(NOT DEFINED NETWORKSTACK_EXTRA_C_FLAGS)
+        set(NETWORKSTACK_EXTRA_C_FLAGS
+            ""
+        )
+    endif(NOT DEFINED NETWORKSTACK_EXTRA_C_FLAGS)
+
     #---------------------------------------------------------------------------
     DeclareCAmkESComponent(${name}
         SOURCES
