@@ -12,7 +12,7 @@
 #include "OS_Network.h"
 #include "OS_NetworkStack.h"
 #include "TimeServer.h"
-#include "lib_compiler/compiler.h"
+#include "lib_macros/Array.h"
 #include "lib_debug/Debug.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
@@ -106,6 +106,17 @@ post_init(void)
         return;
     }
 
+    if (ARRAY_ELEMENTS(networkStack_config.clients) < networkStack_rpc_num_badges())
+    {
+        Debug_LOG_ERROR(
+            "[NwStack '%s'] Configuration found for %d clients, but %d clients"
+            " are connected",
+            get_instance_name(),
+            ARRAY_ELEMENTS(networkStack_config.clients),
+            networkStack_rpc_num_badges());
+        return;
+    }
+
     int* max_clients = calloc(sizeof(int), networkStack_rpc_num_badges());
     if (max_clients == NULL)
     {
@@ -119,7 +130,7 @@ post_init(void)
 
     for (int i = 0; i < networkStack_rpc_num_badges(); i++)
     {
-        max_clients[i] = 8;
+        max_clients[i] = networkStack_config.clients[i].socket_quota;
         totalSocketsNeeded += max_clients[i]; // sockets needed for client i
     }
     // TODO: decide how the user configures this
