@@ -54,7 +54,6 @@ function(NetworkStack_PicoTcp_DeclareCAmkESComponent
             lib_macros
             lib_server
             TimeServer_client
-            syslogger_client
             system_config
     )
 
