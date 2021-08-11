@@ -31,12 +31,6 @@ function(NetworkStack_PicoTcp_DeclareCAmkESComponent
         "C_FLAGS"
     )
 
-    if(NOT DEFINED NETWORKSTACK_EXTRA_C_FLAGS)
-        set(NETWORKSTACK_EXTRA_C_FLAGS
-            ""
-        )
-    endif(NOT DEFINED NETWORKSTACK_EXTRA_C_FLAGS)
-
     #---------------------------------------------------------------------------
     DeclareCAmkESComponent(${name}
         SOURCES
