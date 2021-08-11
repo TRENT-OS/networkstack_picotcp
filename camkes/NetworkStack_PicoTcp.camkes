@@ -246,7 +246,7 @@ struct NetworkStack_Config {
     \
     _rpc_ ## _attributes = (100 + _num_);
 
-
+/**
 /*
  * Assign all clients a badge, in the order in which they are connected to the
  * StorageServer instance via NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS():
@@ -265,7 +265,7 @@ struct NetworkStack_Config {
     _rpc_ ## _attributes = _val_;
 
 
-/*
+/**
  * Assign badges to a list of clients; badge IDs will start at 101 and then be
  * incremented. Make sure to pass clients in same order as they are passed
  * in the NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS() macro:
