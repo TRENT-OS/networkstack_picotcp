@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
+ * Copyright (C) 2021, HENSOLDT Cyber GmbH
  */
 
 /**
@@ -247,7 +247,6 @@ struct NetworkStack_Config {
     _rpc_ ## _attributes = (100 + _num_);
 
 /**
-/*
  * Assign all clients a badge, in the order in which they are connected to the
  * StorageServer instance via NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS():
  *
