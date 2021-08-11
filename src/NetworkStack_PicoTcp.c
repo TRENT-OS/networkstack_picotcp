@@ -29,7 +29,7 @@ static const OS_NetworkStack_AddressConfig_t config =
 static const if_OS_Timer_t timer =
     IF_OS_TIMER_ASSIGN(timeServer_rpc, timeServer_notify);
 
-static bool initSuccessfullyCompleted = false;
+static volatile bool initSuccessfullyCompleted = false;
 
 unsigned int
 networkStack_rpc_num_badges(void);
