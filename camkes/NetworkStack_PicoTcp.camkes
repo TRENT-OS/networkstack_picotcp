@@ -29,11 +29,9 @@ import <if_OS_Timer.camkes>;
 
 //------------------------------------------------------------------------------
 
-
 struct NetworkStack_ClientConfig {
     int socket_quota;
 }
-
 
 struct NetworkStack_Config {
     NetworkStack_ClientConfig clients[];
@@ -90,6 +88,7 @@ struct NetworkStack_Config {
         to   c_conn_##n);
 
 // Public macros ---------------------------------------------------------------
+
 /**
  * Declare a socket number 'n' as member of the network stack.
  *
@@ -234,8 +233,6 @@ struct NetworkStack_Config {
     ...) \
     \
     FOR_EACH_2P(NetworkStack_PicoTcp_CLIENT_CONNECTOR,_inst_,UNUSED,__VA_ARGS__)
-//------------------------------------------------------------------------------
-
 
 // Assign a single badge; this is used internally
 #define NetworkStack_PicoTcp_BADGE_ASSIGNER( \
@@ -262,7 +259,6 @@ struct NetworkStack_Config {
     _val_) \
     \
     _rpc_ ## _attributes = _val_;
-
 
 /**
  * Assign badges to a list of clients; badge IDs will start at 101 and then be
@@ -304,4 +300,3 @@ struct NetworkStack_Config {
                         UNUSED,UNUSED,__VA_ARGS__) \
         ] \
     };
-
