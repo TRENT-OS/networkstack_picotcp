@@ -1,5 +1,5 @@
 /*
- *  OS Network Stack CAmkES wrapper
+ * OS Network Stack CAmkES wrapper
  *
  * Copyright (C) 2021, HENSOLDT Cyber GmbH
  *
@@ -17,6 +17,8 @@
 #include "util/loop_defines.h"
 #include <camkes.h>
 
+// TODO: Update comment with constraints when we have the final form of the 
+// interface.
 #define NUMBER_OF_CLIENTS 8
 
 static const OS_NetworkStack_AddressConfig_t config =
@@ -31,6 +33,9 @@ static const if_OS_Timer_t timer =
 
 static volatile bool initSuccessfullyCompleted = false;
 
+
+// TODO: Until the connector functions are declared in the camkes header, we
+// need to declare them here in order to use them.
 unsigned int
 networkStack_rpc_num_badges(void);
 
@@ -65,7 +70,7 @@ get_client_id_buf_size(void)
 }
 
 //------------------------------------------------------------------------------
-// network stack's PicTCP OS adaption layer calls this.
+// Network stack's PicTCP OS adaption layer calls this.
 uint64_t
 Timer_getTimeMs(void)
 {
@@ -86,7 +91,8 @@ Timer_getTimeMs(void)
 void
 pre_init(void)
 {
-
+    // TODO: Currently intentionally left blank. Check if needed after we
+    // defined the final form of the connector.
 }
 
 //------------------------------------------------------------------------------
@@ -137,7 +143,7 @@ post_init(void)
     }
     // TODO: decide how the user configures this
 
-// will be removed with the event rework
+// TODO: remove with the event rework
 #define LOOP_ELEMENT                                                           \
     {                                                                          \
         .notify_write      = GEN_EMIT(e_write_),                               \
@@ -149,7 +155,7 @@ post_init(void)
         .accepted_handle   = -1,                                               \
     },
 
-    // will be removed with the event rework
+    // TODO: remove with the event rework
     static OS_NetworkStack_SocketResources_t socks[16] = {
 #define LOOP_COUNT 16
 #include "util/loop.h" // places LOOP_ELEMENT here for LOOP_COUNT times
@@ -258,9 +264,9 @@ run(void)
         return -1;
     }
 
-    // actually, OS_NetworkStack_run() is not supposed to return with
+    // Actually, OS_NetworkStack_run() is not supposed to return with
     // OS_SUCCESS. We have to assume this is a graceful shutdown for some
-    // reason
+    // reason.
     Debug_LOG_WARNING(
         "[NwStack '%s'] graceful termination",
         get_instance_name());

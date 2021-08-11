@@ -7,7 +7,7 @@
  *
  * Generic TRENTOS Network Stack CAmkES template code.
  *
- * This file provides macros that can be used for the definition a network stack
+ * This file provides macros that can be used for the definition of a network stack
  * component. The network stack component implements the socket interface
  * (if_OS_Socket) and connects to a NIC driver component via the NIC component
  * interface (if_OS_Nic).
