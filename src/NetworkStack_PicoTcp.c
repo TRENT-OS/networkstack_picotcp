@@ -95,30 +95,32 @@ post_init(void)
 {
     Debug_LOG_INFO("[NwStack '%s'] starting", get_instance_name());
 
-    if (NUMBER_OF_CLIENTS < networkStack_rpc_num_badges())
+    const unsigned int number_connected_clients = networkStack_rpc_num_badges();
+
+    if (NUMBER_OF_CLIENTS < number_connected_clients)
     {
         Debug_LOG_ERROR(
             "[NwStack '%s'] is configured for %d clients, but %d clients are "
             "connected",
             get_instance_name(),
             NUMBER_OF_CLIENTS,
-            networkStack_rpc_num_badges());
+            number_connected_clients);
         return;
     }
 
-    if (ARRAY_ELEMENTS(networkStack_config.clients) < networkStack_rpc_num_badges())
+    if (ARRAY_ELEMENTS(networkStack_config.clients) < number_connected_clients)
     {
         Debug_LOG_ERROR(
             "[NwStack '%s'] Configuration found for %d clients, but %d clients"
             " are connected",
             get_instance_name(),
             ARRAY_ELEMENTS(networkStack_config.clients),
-            networkStack_rpc_num_badges());
+            number_connected_clients);
         return;
     }
 
-    int* max_clients = calloc(sizeof(int), networkStack_rpc_num_badges());
-    if (max_clients == NULL)
+    int* max_client_sockets = calloc(sizeof(int), number_connected_clients);
+    if (max_client_sockets == NULL)
     {
         Debug_LOG_ERROR(
             "[NwStack '%s'] Could not allocate resources.",
@@ -128,10 +130,10 @@ post_init(void)
 
     int totalSocketsNeeded = 0;
 
-    for (int i = 0; i < networkStack_rpc_num_badges(); i++)
+    for (int i = 0; i < number_connected_clients; i++)
     {
-        max_clients[i] = networkStack_config.clients[i].socket_quota;
-        totalSocketsNeeded += max_clients[i]; // sockets needed for client i
+        max_client_sockets[i] = networkStack_config.clients[i].socket_quota;
+        totalSocketsNeeded += max_client_sockets[i]; // sockets needed for client i
     }
     // TODO: decide how the user configures this
 
@@ -173,9 +175,9 @@ post_init(void)
             .stackTS_lock       = stackThreadSafeMutex_lock,
             .stackTS_unlock     = stackThreadSafeMutex_unlock,
 
-            .number_of_clients      = networkStack_rpc_num_badges(),
+            .number_of_clients      = number_connected_clients,
             .number_of_sockets      = totalSocketsNeeded,
-            .client_sockets_quota   = max_clients,
+            .client_sockets_quota   = max_client_sockets,
             .sockets                = socks,
         },
 
@@ -205,9 +207,9 @@ post_init(void)
 
     *p_camkes_config = camkes_config;
 
-    Debug_LOG_INFO("Clients connected %d", networkStack_rpc_num_badges());
+    Debug_LOG_INFO("Clients connected %d", number_connected_clients);
 
-    for (int i = 0; i < networkStack_rpc_num_badges(); i++)
+    for (int i = 0; i < number_connected_clients; i++)
         Debug_LOG_INFO("Client badge #%d", networkStack_rpc_enumerate_badge(i));
 
     OS_Error_t ret;
