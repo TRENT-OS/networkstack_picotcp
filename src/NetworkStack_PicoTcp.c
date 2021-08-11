@@ -248,10 +248,6 @@ run(void)
         return -1;
     }
 
-    // The Ticker component sends us a tick every second. Currently there is
-    // no dedicated interface to enable and disable the tick. because we don't
-    // need this. OS_NetworkStack_run() is not supposed to return.
-
     OS_Error_t ret = OS_NetworkStack_run();
     if (ret != OS_SUCCESS)
     {
