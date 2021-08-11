@@ -40,7 +40,7 @@ function(NetworkStack_PicoTcp_DeclareCAmkESComponent
     #---------------------------------------------------------------------------
     DeclareCAmkESComponent(${name}
         SOURCES
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/NwStack/network_stack.c
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/NetworkStack_PicoTcp.c
         C_FLAGS
             -Wall
             -Werror
