@@ -87,6 +87,20 @@ struct NetworkStack_Config {
         from e_conn_##n, \
         to   c_conn_##n);
 
+/**
+ * Internal macro that used to configure the socket quota for each connected
+ * client.
+ */
+#define NetworkStack_PicoTcp_INSTANCE_CONFIGURATOR( \
+    _unused0, \
+    _unused1_, \
+    _socket_quota_, \
+    _unused2_) \
+    \
+    { \
+        "socket_quota": _socket_quota_ \
+    },
+
 // Public macros ---------------------------------------------------------------
 
 /**
@@ -279,17 +293,18 @@ struct NetworkStack_Config {
     \
     FOR_EACH_1P(NetworkStack_PicoTcp_BADGE_ASSIGNER,UNUSED,UNUSED,__VA_ARGS__)
 
-// Configure a single client instance
-#define NetworkStack_PicoTcp_INSTANCE_CONFIGURATOR( \
-    _unused0, \
-    _unused1_, \
-    _socket_quota_, \
-    _unused2_) \
-    \
-    { \
-        "socket_quota": _socket_quota_ \
-    },
-
+/**
+ * Configure all clients connected to a NetworkStack_PicoTc instance:
+ *
+ *      NetworkStack_PicoTcp_INSTANCE_CONFIGURE_CLIENTS(
+ *          <instance>,
+ *          <socket_quota0>,
+ *          <socket_quota1>,
+ *          ...
+ *      )
+ * Make sure to pass clients in same order as they are passed in the
+ * NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS() macro.
+ */
 #define NetworkStack_PicoTcp_INSTANCE_CONFIGURE_CLIENTS( \
     _inst_, \
     ...) \
