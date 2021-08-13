@@ -21,9 +21,9 @@ import <global-connectors.camkes>;
 #include "lib_macros/ForEach.h"
 
 #include <if_OS_Nic.camkes>
+#include <if_OS_Socket.camkes>
 
 /** @cond SKIP_IMPORTS */
-import <if_OS_Socket.camkes>;
 import <if_OS_Timer.camkes>;
 /** @endcond */
 
@@ -170,8 +170,8 @@ struct NetworkStack_Config {
         \
         /*------------------------------------------------------------------*/ \
         /* interface to application */ \
-        provides  if_OS_Socket          networkStack_rpc; \
-        _NWSTACK_MACRO_LOOP(num_sockets, NetworkStack_PicoTcp_Socket_DECLARE) \
+        IF_OS_SOCKET_PROVIDE(networkStack) \
+        \
         /*------------------------------------------------------------------*/ \
         /* other interfaces */ \
         other_interfaces \
@@ -181,8 +181,6 @@ struct NetworkStack_Config {
             connection seL4NotificationNative conn_event_internal( \
                 from event_internal, \
                 to   event_tick_or_data); \
-            \
-            _NWSTACK_MACRO_LOOP(num_sockets, _NWSTACK_CONNECT_SOCKET) \
         } \
     }
 
@@ -219,34 +217,28 @@ struct NetworkStack_Config {
         event_tick_or_data)
 
 /**
- * Connects a client component to a network stack through sockets.
+ * Connects a variable number of client components to a network stack instance.
  *
- * @param[in] inst        Name of the network stack component instance.
- * @param[in] client      Name of client component instance.
- * @param[in] client_rpc  Name of the client RPC to connect to the socket RPC.
- * @param[in] ...         List of client dataport names to connect to the
- *                        sockets. Each socket, by design, needs a dataport.
- *                        WARNING: Regardless of the amount of sockets that a
- *                        user component may need from a network stack it is
- *                        mandatory that each dataport of the network stack gets
- *                        connected to a corresponding one on the user component
- *                        side.
+ * @param[in] inst              Name of the network stack component instance.
+ * @param[in] inst_field_prefix Prefix used to generate a unique name for the
+ *                              connectors in IF_OS_SOCKET_PROVIDE().
+ * @param[in] ...               List of client user component instance names and
+ *                              the prefix used to generate a unique name for
+ *                              the connectors used in IF_OS_SOCKET_USE() and
+ *                              that should be connected with the network stack
+ *                              instance specified earlier. To connect several
+ *                              user components at once follow the pattern of:
+ *
+ *                              <inst_user1>, <inst_user1_field_prefix>,
+ *                              <inst_user2>, <inst_user2_field_prefix>,
+ *                              ...
  */
-#define NetworkStack_PicoTcp_CLIENT_CONNECTOR( \
-    _inst_, \
-    _unused_, \
-    _client_, \
-    _client_rpc_, \
-    ...) \
-    connection seL4RPCDataport conn_rpc_##_client_##_##_inst_( \
-        from _client_._client_rpc_, \
-        to   _inst_.networkStack_rpc);
-
 #define NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS( \
-    _inst_, \
+    inst, \
+    inst_field_prefix, \
     ...) \
     \
-    FOR_EACH_2P(NetworkStack_PicoTcp_CLIENT_CONNECTOR,_inst_,UNUSED,__VA_ARGS__)
+    FOR_EACH_2P(IF_OS_SOCKET_CONNECT,inst,inst_field_prefix,__VA_ARGS__)
 
 // Assign a single badge; this is used internally
 #define NetworkStack_PicoTcp_BADGE_ASSIGNER( \
