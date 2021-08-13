@@ -209,7 +209,9 @@ post_init(void)
     Debug_LOG_INFO("Clients connected %d", number_connected_clients);
 
     for (int i = 0; i < number_connected_clients; i++)
+    {
         Debug_LOG_INFO("Client badge #%d", networkStack_rpc_enumerate_badge(i));
+    }
 
     OS_Error_t ret;
 
