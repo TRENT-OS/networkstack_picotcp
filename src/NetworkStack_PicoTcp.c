@@ -16,7 +16,7 @@
 #include "util/loop_defines.h"
 #include <camkes.h>
 
-// TODO: Update comment with constraints when we have the final form of the 
+// TODO: Update comment with constraints when we have the final form of the
 // interface.
 #define NUMBER_OF_CLIENTS 8
 
