@@ -100,27 +100,27 @@ post_init(void)
 {
     Debug_LOG_INFO("[NwStack '%s'] starting", get_instance_name());
 
-    const unsigned int number_connected_clients = networkStack_rpc_num_badges();
+    const unsigned int numberConnectedClients = networkStack_rpc_num_badges();
 
-    if (NUMBER_OF_CLIENTS < number_connected_clients)
+    if (NUMBER_OF_CLIENTS < numberConnectedClients)
     {
         Debug_LOG_ERROR(
             "[NwStack '%s'] is configured for %d clients, but %d clients are "
             "connected",
             get_instance_name(),
             NUMBER_OF_CLIENTS,
-            number_connected_clients);
+            numberConnectedClients);
         return;
     }
 
-    if (ARRAY_ELEMENTS(networkStack_config.clients) < number_connected_clients)
+    if (ARRAY_ELEMENTS(networkStack_config.clients) < numberConnectedClients)
     {
         Debug_LOG_ERROR(
             "[NwStack '%s'] Configuration found for %d clients, but %d clients"
             " are connected",
             get_instance_name(),
             ARRAY_ELEMENTS(networkStack_config.clients),
-            number_connected_clients);
+            numberConnectedClients);
         return;
     }
 
@@ -154,7 +154,7 @@ post_init(void)
         totalSocketsNeeded += clients[i].socketQuota;
     }
 
-    const OS_NetworkStack_CamkesConfig_t camkes_config =
+    const OS_NetworkStack_CamkesConfig_t camkesConfig =
     {
         .wait_loop_event         = event_tick_or_data_wait,
 
@@ -174,7 +174,7 @@ post_init(void)
             .stackTS_lock       = stackThreadSafeMutex_lock,
             .stackTS_unlock     = stackThreadSafeMutex_unlock,
 
-            .number_of_clients  = number_connected_clients,
+            .number_of_clients  = numberConnectedClients,
             .number_of_sockets  = totalSocketsNeeded,
             .sockets            = socks,
             .clients            = clients
@@ -194,9 +194,9 @@ post_init(void)
         }
     };
 
-    OS_NetworkStack_CamkesConfig_t* p_camkes_config =
+    OS_NetworkStack_CamkesConfig_t* pCamkesConfig =
         malloc(sizeof(OS_NetworkStack_CamkesConfig_t));
-    if (p_camkes_config == NULL)
+    if (pCamkesConfig == NULL)
     {
         Debug_LOG_ERROR(
             "[NwStack '%s'] Could not allocate resources.",
@@ -204,11 +204,11 @@ post_init(void)
         return;
     }
 
-    *p_camkes_config = camkes_config;
+    *pCamkesConfig = camkesConfig;
 
-    Debug_LOG_INFO("Clients connected %d", number_connected_clients);
+    Debug_LOG_INFO("Clients connected %d", numberConnectedClients);
 
-    for (int i = 0; i < number_connected_clients; i++)
+    for (int i = 0; i < numberConnectedClients; i++)
     {
         Debug_LOG_INFO("Client badge #%d", networkStack_rpc_enumerate_badge(i));
     }
@@ -225,7 +225,7 @@ post_init(void)
         get_instance_name(),
         SUBNET_MASK);
 
-    ret = OS_NetworkStack_init(p_camkes_config, &config);
+    ret = OS_NetworkStack_init(pCamkesConfig, &config);
     if (ret != OS_SUCCESS)
     {
         Debug_LOG_FATAL(
