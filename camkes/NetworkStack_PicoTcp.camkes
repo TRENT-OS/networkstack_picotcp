@@ -188,7 +188,7 @@ struct NetworkStack_Config {
 
 /**
  * Assign all clients a badge, in the order in which they are connected to the
- * StorageServer instance via NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS():
+ * network stack instance via NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS():
  *
  *      NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGE(
  *          <client_rpc>, <ID>
