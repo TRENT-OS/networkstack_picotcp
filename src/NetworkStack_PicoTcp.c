@@ -18,7 +18,7 @@
 
 // TODO: Update comment with constraints when we have the final form of the
 // interface.
-#define NUMBER_OF_CLIENTS 8
+#define MAX_CLIENTS_NUM 8
 
 static const OS_NetworkStack_AddressConfig_t config =
 {
@@ -102,13 +102,13 @@ post_init(void)
 
     const unsigned int numberConnectedClients = networkStack_rpc_num_badges();
 
-    if (NUMBER_OF_CLIENTS < numberConnectedClients)
+    if (MAX_CLIENTS_NUM < numberConnectedClients)
     {
         Debug_LOG_ERROR(
             "[NwStack '%s'] is configured for %d clients, but %d clients are "
             "connected",
             get_instance_name(),
-            NUMBER_OF_CLIENTS,
+            MAX_CLIENTS_NUM,
             numberConnectedClients);
         return;
     }
@@ -126,7 +126,7 @@ post_init(void)
 
     static OS_NetworkStack_SocketResources_t sockets[OS_NETWORK_MAXIMUM_SOCKET_NO];
 
-    static const event_notify_func_t notifications[NUMBER_OF_CLIENTS] =
+    static const event_notify_func_t notifications[MAX_CLIENTS_NUM] =
     {
         networkStack_1_event_notify_emit,
         networkStack_2_event_notify_emit,
