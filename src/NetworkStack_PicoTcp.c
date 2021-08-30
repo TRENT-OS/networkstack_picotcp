@@ -124,7 +124,7 @@ post_init(void)
         return;
     }
 
-    static OS_NetworkStack_SocketResources_t socks[OS_NETWORK_MAXIMUM_SOCKET_NO];
+    static OS_NetworkStack_SocketResources_t sockets[OS_NETWORK_MAXIMUM_SOCKET_NO];
 
     static const event_notify_func_t notifications[NUMBER_OF_CLIENTS] =
     {
@@ -176,7 +176,7 @@ post_init(void)
 
             .number_of_clients  = numberConnectedClients,
             .number_of_sockets  = totalSocketsNeeded,
-            .sockets            = socks,
+            .sockets            = sockets,
             .clients            = clients
         },
 
