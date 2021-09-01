@@ -157,8 +157,6 @@ struct NetworkStack_Config {
  * Connects a variable number of client components to a network stack instance.
  *
  * @param[in] inst              Name of the network stack component instance.
- * @param[in] inst_field_prefix Prefix used to generate a unique name for the
- *                              connectors in IF_OS_SOCKET_PROVIDE().
  * @param[in] ...               List of client user component instance names and
  *                              the prefix used to generate a unique name for
  *                              the connectors used in IF_OS_SOCKET_USE() and
@@ -172,10 +170,9 @@ struct NetworkStack_Config {
  */
 #define NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS( \
     inst, \
-    inst_field_prefix, \
     ...) \
     \
-    FOR_EACH_2P(IF_OS_SOCKET_CONNECT,inst,inst_field_prefix,__VA_ARGS__)
+    FOR_EACH_2P(IF_OS_SOCKET_CONNECT,inst,networkStack,__VA_ARGS__)
 
 // Assign a single badge; this is used internally
 #define NetworkStack_PicoTcp_BADGE_ASSIGNER( \
