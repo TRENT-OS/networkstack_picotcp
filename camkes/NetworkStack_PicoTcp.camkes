@@ -164,8 +164,8 @@ struct NetworkStack_Config {
  *                              instance specified earlier. To connect several
  *                              user components at once follow the pattern of:
  *
- *                              <inst_user1>, <inst_user1_field_prefix>,
- *                              <inst_user2>, <inst_user2_field_prefix>,
+ *                              <inst_user1>, <inst_user1_prefix_if_os_socket>,
+ *                              <inst_user2>, <inst_user1_prefix_if_os_socket>,
  *                              ...
  */
 #define NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS( \
