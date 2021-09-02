@@ -138,23 +138,20 @@ post_init(void)
         networkStack_8_event_notify_emit
     };
 
-    int totalSocketsNeeded = 0;
-
-    static OS_NetworkStack_Client_t clients[MAX_CLIENTS_NUM];
+    static OS_NetworkStack_Client_t clients[MAX_CLIENTS_NUM] = {0};
 
     for (int i = 0; i < numberConnectedClients; i++)
     {
         clients[i].needsToBeNotified = false;
+        clients[i].inUse = true;
         clients[i].socketQuota = networkStack_config.clients[i].socket_quota;
         clients[i].currentSocketsInUse = 0;
         clients[i].tail = 0;
         clients[i].head = 0;
         clients[i].eventNotify = notifications[i];
-
-        totalSocketsNeeded += clients[i].socketQuota;
     }
 
-    const OS_NetworkStack_CamkesConfig_t camkesConfig =
+    static const OS_NetworkStack_CamkesConfig_t camkesConfig =
     {
         .wait_loop_event         = event_tick_or_data_wait,
 
@@ -174,8 +171,9 @@ post_init(void)
             .stackTS_lock       = stackThreadSafeMutex_lock,
             .stackTS_unlock     = stackThreadSafeMutex_unlock,
 
-            .number_of_clients  = numberConnectedClients,
-            .number_of_sockets  = totalSocketsNeeded,
+            .number_of_clients  = MAX_CLIENTS_NUM,
+            .number_of_sockets  = OS_NETWORK_MAXIMUM_SOCKET_NO,
+
             .sockets            = sockets,
             .clients            = clients
         },
@@ -193,18 +191,6 @@ post_init(void)
             }
         }
     };
-
-    OS_NetworkStack_CamkesConfig_t* pCamkesConfig =
-        malloc(sizeof(OS_NetworkStack_CamkesConfig_t));
-    if (pCamkesConfig == NULL)
-    {
-        Debug_LOG_ERROR(
-            "[NwStack '%s'] Could not allocate resources.",
-            get_instance_name());
-        return;
-    }
-
-    *pCamkesConfig = camkesConfig;
 
     Debug_LOG_INFO("Clients connected %d", numberConnectedClients);
 
@@ -225,7 +211,7 @@ post_init(void)
         get_instance_name(),
         SUBNET_MASK);
 
-    ret = OS_NetworkStack_init(pCamkesConfig, &config);
+    ret = OS_NetworkStack_init(&camkesConfig, &config);
     if (ret != OS_SUCCESS)
     {
         Debug_LOG_FATAL(
