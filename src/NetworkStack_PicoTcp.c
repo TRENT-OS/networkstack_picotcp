@@ -124,41 +124,35 @@ post_init(void)
         return;
     }
 
-    int* max_client_sockets = calloc(sizeof(int), number_connected_clients);
-    if (max_client_sockets == NULL)
+    static OS_NetworkStack_SocketResources_t socks[OS_NETWORK_MAXIMUM_SOCKET_NO];
+
+    static const event_notify_func_t notifications[NUMBER_OF_CLIENTS] =
     {
-        Debug_LOG_ERROR(
-            "[NwStack '%s'] Could not allocate resources.",
-            get_instance_name());
-        return;
-    }
+        networkStack_1_event_notify_emit,
+        networkStack_2_event_notify_emit,
+        networkStack_3_event_notify_emit,
+        networkStack_4_event_notify_emit,
+        networkStack_5_event_notify_emit,
+        networkStack_6_event_notify_emit,
+        networkStack_7_event_notify_emit,
+        networkStack_8_event_notify_emit
+    };
 
     int totalSocketsNeeded = 0;
 
-    for (int i = 0; i < number_connected_clients; i++)
+    static OS_NetworkStack_Client_t clients[MAX_CLIENTS_NUM];
+
+    for (int i = 0; i < numberConnectedClients; i++)
     {
-        max_client_sockets[i] = networkStack_config.clients[i].socket_quota;
-        totalSocketsNeeded += max_client_sockets[i]; // sockets needed for client i
+        clients[i].needsToBeNotified = false;
+        clients[i].socketQuota = networkStack_config.clients[i].socket_quota;
+        clients[i].currentSocketsInUse = 0;
+        clients[i].tail = 0;
+        clients[i].head = 0;
+        clients[i].eventNotify = notifications[i];
+
+        totalSocketsNeeded += clients[i].socketQuota;
     }
-    // TODO: decide how the user configures this
-
-// TODO: remove with the event rework
-#define LOOP_ELEMENT                                                           \
-    {                                                                          \
-        .notify_write      = GEN_EMIT(e_write_),                               \
-        .wait_write        = GEN_WAIT(c_write_),                               \
-        .notify_read       = GEN_EMIT(e_read_),                                \
-        .wait_read         = GEN_WAIT(c_read_),                                \
-        .notify_connection = GEN_EMIT(e_conn_),                                \
-        .wait_connection   = GEN_WAIT(c_conn_),                                \
-        .accepted_handle   = -1,                                               \
-    },
-
-    // TODO: remove with the event rework
-    static OS_NetworkStack_SocketResources_t socks[16] = {
-#define LOOP_COUNT 16
-#include "util/loop.h" // places LOOP_ELEMENT here for LOOP_COUNT times
-    };
 
     const OS_NetworkStack_CamkesConfig_t camkes_config =
     {
@@ -180,10 +174,10 @@ post_init(void)
             .stackTS_lock       = stackThreadSafeMutex_lock,
             .stackTS_unlock     = stackThreadSafeMutex_unlock,
 
-            .number_of_clients      = number_connected_clients,
-            .number_of_sockets      = totalSocketsNeeded,
-            .client_sockets_quota   = max_client_sockets,
-            .sockets                = socks,
+            .number_of_clients  = number_connected_clients,
+            .number_of_sockets  = totalSocketsNeeded,
+            .sockets            = socks,
+            .clients            = clients
         },
 
         .drv_nic =
