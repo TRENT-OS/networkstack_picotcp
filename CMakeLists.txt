@@ -59,4 +59,15 @@ function(NetworkStack_PicoTcp_DeclareCAmkESComponent
             system_config
     )
 
+    DeclareCAmkESComponent(
+        Ticker
+        SOURCES
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/NetworkStack_Ticker.c
+        C_FLAGS
+            -Wall
+            -Werror
+        LIBS
+            os_core_api
+            lib_debug
+    )
 endfunction()

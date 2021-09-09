@@ -23,6 +23,7 @@ import <global-connectors.camkes>;
 #include <if_OS_Nic.camkes>
 #include <if_OS_Socket.camkes>
 
+#include "NetworkStack_PicoTcp/camkes/NetworkStack_Ticker.camkes"
 #include "if_NetworkStack_PicoTcp_Config.camkes"
 
 /** @cond SKIP_IMPORTS */
@@ -99,8 +100,11 @@ struct NetworkStack_Config {
         \
         /*------------------------------------------------------------------*/ \
         /* interface TimeServer */ \
-        uses      if_OS_Timer           timeServer_rpc; \
-        consumes  TimerReady            timeServer_notify; \
+        uses      if_OS_Timer           internal_timeServer_rpc; \
+        consumes  TimerReady            internal_timeServer_notify; \
+        \
+        uses        if_OS_Timer         timeServer_rpc; \
+        consumes    TimerReady          timeServer_notify; \
         \
         /*------------------------------------------------------------------*/ \
         /* if_OS_Nic without a dedicated event, because our interface */ \
@@ -118,14 +122,40 @@ struct NetworkStack_Config {
         \
         composition \
         { \
-            connection seL4NotificationNative conn_event_internal( \
-                from event_internal, \
-                to   event_tick_or_data); \
+            component Ticker ticker;\
+            \
+            export ticker.timeServer_rpc -> timeServer_rpc; \
+            export ticker.timeServer_notify -> timeServer_notify; \
+            \
+            connection seL4NotificationNative \
+                conn_event_internal( \
+                    from event_internal, \
+                    to   event_tick_or_data); \
+            \
+            connection seL4RPCCall \
+                network_stack_internal_timeServer_rpc( \
+                    from    internal_timeServer_rpc, \
+                    to      ticker.proxy_timeServer_rpc); \
+            \
+            connection seL4NotificationNative \
+                network_stack_internal_timeServer_event( \
+                    from    ticker.proxy_timeServer_notify, \
+                    to      internal_timeServer_notify); \
+            \
+            connection seL4NotificationNative \
+                conn_event_internal_ticker( \
+                    from ticker.event_tick, \
+                    to   event_tick_or_data); \
+        \
+        } \
+        configuration \
+        { \
+            ticker.timeServer_rpc_attributes <- timeServer_rpc_attributes; \
         } \
     }
 
 /**
- * Connects a network stack instance to a ticker event and a NIC component.
+ * Connects a network stack instance to a NIC component.
  *
  * So far, all NIC component interface related fields of the network stack use
  * the prefix 'nic', and the same prefix is also used by all network drivers for
@@ -135,19 +165,12 @@ struct NetworkStack_Config {
  * prefix.
  *
  * @param[in] inst             Name of the network stack component instance.
- * @param[in] ticker_event_src Source ticker event to connect to the network
- *                             stack.
  * @param[in] nic_inst         Name of the NIC component instance to which the
  *                             network stack component has to connect to.
  */
 #define NetworkStack_PicoTcp_INSTANCE_CONNECT( \
     inst, \
-    ticker_event_src, \
     nic_inst) \
-    \
-    connection seL4NotificationNative conn_event_##inst##_ticker( \
-        from ticker_event_src, \
-        to   inst.event_tick_or_data); \
     \
     IF_OS_NIC_CONNECT(\
         nic_inst, \

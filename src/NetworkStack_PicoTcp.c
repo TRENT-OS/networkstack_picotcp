@@ -24,7 +24,7 @@
 #define MAX_CLIENTS_NUM 8
 
 static const if_OS_Timer_t timer =
-    IF_OS_TIMER_ASSIGN(timeServer_rpc, timeServer_notify);
+    IF_OS_TIMER_ASSIGN(internal_timeServer_rpc, internal_timeServer_notify);
 
 static OS_NetworkStack_AddressConfig_t ipAddrConfig;
 static const OS_NetworkStack_AddressConfig_t* pIpAddrConfig = NULL;
