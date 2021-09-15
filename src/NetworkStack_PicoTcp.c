@@ -10,28 +10,24 @@
 #include "OS_Error.h"
 #include "OS_Network.h"
 #include "OS_NetworkStack.h"
+
 #include "TimeServer.h"
 #include "lib_macros/Array.h"
 #include "lib_debug/Debug.h"
 #include "util/loop_defines.h"
+
 #include <camkes.h>
+#include <string.h>
 
 // TODO: Update comment with constraints when we have the final form of the
 // interface.
 #define MAX_CLIENTS_NUM 8
 
-static const OS_NetworkStack_AddressConfig_t config =
-{
-    .dev_addr     = DEV_ADDR,
-    .gateway_addr = GATEWAY_ADDR,
-    .subnet_mask  = SUBNET_MASK
-};
-
 static const if_OS_Timer_t timer =
     IF_OS_TIMER_ASSIGN(timeServer_rpc, timeServer_notify);
 
-static volatile bool initSuccessfullyCompleted = false;
-
+static OS_NetworkStack_AddressConfig_t ipAddrConfig;
+static const OS_NetworkStack_AddressConfig_t* pIpAddrConfig = NULL;
 
 // TODO: Until the connector functions are declared in the camkes header, we
 // need to declare them here in order to use them.
@@ -53,7 +49,8 @@ networkStack_rpc_buf_size(seL4_Word client_id);
 int
 get_client_id(void)
 {
-    return networkStack_rpc_get_sender_id() - networkStack_rpc_enumerate_badge(0);
+    return networkStack_rpc_get_sender_id() -
+        networkStack_rpc_enumerate_badge(0);
 }
 
 uint8_t*
@@ -66,6 +63,13 @@ int
 get_client_id_buf_size(void)
 {
     return networkStack_rpc_buf_size(networkStack_rpc_get_sender_id());
+}
+
+bool isValidIp4Address(const char* ipAddress)
+{
+    struct sockaddr_in sa;
+    int result = inet_pton(AF_INET, ipAddress, &(sa.sin_addr));
+    return result != 0;
 }
 
 //------------------------------------------------------------------------------
@@ -94,9 +98,30 @@ pre_init(void)
     // defined the final form of the connector.
 }
 
-//------------------------------------------------------------------------------
 void
 post_init(void)
+{
+    // TODO: Currently intentionally left blank. Check if needed after we
+    // defined the final form of the connector.
+}
+
+OS_Error_t
+if_config_rpc_configIpAddr(
+     const OS_NetworkStack_AddressConfig_t* pConfig)
+{
+    if (!isValidIp4Address(pConfig->dev_addr) ||
+        !isValidIp4Address(pConfig->gateway_addr) ||
+        !isValidIp4Address(pConfig->subnet_mask))
+    {
+        return OS_ERROR_INVALID_PARAMETER;
+    }
+    memcpy(&ipAddrConfig, pConfig, sizeof(ipAddrConfig));
+    pIpAddrConfig = &ipAddrConfig;
+    return OS_SUCCESS;
+}
+
+OS_Error_t
+initializeNetworkStack(void)
 {
     Debug_LOG_INFO("[NwStack '%s'] starting", get_instance_name());
 
@@ -110,7 +135,7 @@ post_init(void)
             get_instance_name(),
             MAX_CLIENTS_NUM,
             numberConnectedClients);
-        return;
+        return OS_ERROR_OUT_OF_BOUNDS;
     }
 
     if (ARRAY_ELEMENTS(networkStack_config.clients) < numberConnectedClients)
@@ -121,7 +146,7 @@ post_init(void)
             get_instance_name(),
             ARRAY_ELEMENTS(networkStack_config.clients),
             numberConnectedClients);
-        return;
+        return OS_ERROR_OUT_OF_BOUNDS;;
     }
 
     static OS_NetworkStack_SocketResources_t sockets[OS_NETWORK_MAXIMUM_SOCKET_NO];
@@ -196,53 +221,64 @@ post_init(void)
 
     for (int i = 0; i < numberConnectedClients; i++)
     {
-        Debug_LOG_INFO("Client badge #%d", networkStack_rpc_enumerate_badge(i));
+        Debug_LOG_INFO("Client badge #%d",
+            networkStack_rpc_enumerate_badge(i));
     }
 
-    OS_Error_t ret;
-
-    Debug_LOG_INFO("[NwStack '%s'] IP ADDR: %s", get_instance_name(), DEV_ADDR);
+    Debug_LOG_INFO("[NwStack '%s'] IP ADDR: %s",
+        get_instance_name(),
+        pIpAddrConfig->dev_addr);
     Debug_LOG_INFO(
         "[NwStack '%s'] GATEWAY ADDR: %s",
         get_instance_name(),
-        GATEWAY_ADDR);
+        pIpAddrConfig->gateway_addr);
     Debug_LOG_INFO(
         "[NwStack '%s'] SUBNETMASK: %s",
         get_instance_name(),
-        SUBNET_MASK);
+        pIpAddrConfig->subnet_mask);
 
-    ret = OS_NetworkStack_init(&camkesConfig, &config);
+    OS_Error_t ret = OS_NetworkStack_init(&camkesConfig, pIpAddrConfig);
     if (ret != OS_SUCCESS)
     {
         Debug_LOG_FATAL(
             "[NwStack '%s'] OS_NetworkStack_init() failed, error %d",
             get_instance_name(),
             ret);
-        return;
     }
-    initSuccessfullyCompleted = true;
+    return ret;
 }
+
 
 //------------------------------------------------------------------------------
 int
 run(void)
 {
-    if (!initSuccessfullyCompleted)
+#if defined(NetworkStack_PicoTcp_USE_HARDCODED_IPADDR)
+    static const OS_NetworkStack_AddressConfig_t config =
     {
-        Debug_LOG_FATAL(
-            "[NwStack '%s'] initialization failed",
-            get_instance_name());
-        return -1;
+        .dev_addr     = DEV_ADDR,
+        .gateway_addr = GATEWAY_ADDR,
+        .subnet_mask  = SUBNET_MASK
+    };
+    pIpAddrConfig = &config;
+#endif
+
+    while (NULL == pIpAddrConfig) // not yet ready, user has not yet
+                                          // configured the nwStack
+    {
+        seL4_Yield();
     }
 
-    OS_Error_t ret = OS_NetworkStack_run();
+    OS_Error_t ret = initializeNetworkStack();
     if (ret != OS_SUCCESS)
     {
-        Debug_LOG_FATAL(
-            "[NwStack '%s'] OS_NetworkStack_run() failed, error %d",
-            get_instance_name(),
-            ret);
-        return -1;
+        goto err;
+    }
+
+    ret = OS_NetworkStack_run();
+    if (ret != OS_SUCCESS)
+    {
+        goto err;
     }
 
     // Actually, OS_NetworkStack_run() is not supposed to return with
@@ -253,4 +289,11 @@ run(void)
         get_instance_name());
 
     return 0;
+
+err:
+    Debug_LOG_FATAL(
+            "[NwStack '%s'] OS_NetworkStack_run() failed, error %d",
+            get_instance_name(),
+            ret);
+    return -1;
 }

@@ -7,8 +7,8 @@
  *
  * Generic TRENTOS Network Stack CAmkES template code.
  *
- * This file provides macros that can be used for the definition of a network stack
- * component. The network stack component implements the socket interface
+ * This file provides macros that can be used for the definition of a network
+ * stack component. The network stack component implements the socket interface
  * (if_OS_Socket) and connects to a NIC driver component via the NIC component
  * interface (if_OS_Nic).
  */
@@ -22,6 +22,8 @@ import <global-connectors.camkes>;
 
 #include <if_OS_Nic.camkes>
 #include <if_OS_Socket.camkes>
+
+#include "if_NetworkStack_PicoTcp_Config.camkes"
 
 /** @cond SKIP_IMPORTS */
 import <if_OS_Timer.camkes>;
@@ -107,6 +109,7 @@ struct NetworkStack_Config {
         \
         /*------------------------------------------------------------------*/ \
         /* interface to application */ \
+        provides if_NetworkStack_PicoTcp_Config if_config_rpc; \
         IF_OS_SOCKET_PROVIDE(networkStack) \
         \
         /*------------------------------------------------------------------*/ \
@@ -154,7 +157,29 @@ struct NetworkStack_Config {
         event_tick_or_data)
 
 /**
- * Connects a variable number of client components to a network stack instance.
+ * Connects a client component (e.g.: Configuration management component) to the
+ * if_OS_NetworkStack interface of a network stack instance.
+ *
+ * @param[in] inst                      Name of the network stack component
+ *                                      instance.
+ * @param[in] inst_user                 User component instance name.
+ * @param[in] inst_user_field_prefix    Prefix used to generate a unique name
+ *                                      for the connectors in
+ *                                      if_NetworkStack_PicoTcp_Config_USE().
+ */
+#define NetworkStack_PicoTcp_INSTANCE_CONNECT_CONFIG_CLIENT( \
+    inst, \
+    inst_user, \
+    inst_user_field_prefix) \
+    \
+    connection seL4RPCCall \
+        conn_##inst_user##_##inst##_rpc( \
+            from inst_user.inst_user_field_prefix##_rpc, \
+            to   inst.if_config_rpc);
+
+ /**
+ * Connects a variable number of client components to the if_OS_Socket interface
+ * of a network stack instance.
  *
  * @param[in] inst              Name of the network stack component instance.
  * @param[in] ...               List of client user component instance names and
@@ -165,14 +190,17 @@ struct NetworkStack_Config {
  *                              user components at once follow the pattern of:
  *
  *                              <inst_user1>, <inst_user1_prefix_if_os_socket>,
- *                              <inst_user2>, <inst_user1_prefix_if_os_socket>,
+ *                              <inst_user2>, <inst_user2_prefix_if_os_socket>,
  *                              ...
  */
 #define NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS( \
     inst, \
     ...) \
     \
-    FOR_EACH_2P(IF_OS_SOCKET_CONNECT,inst,networkStack,__VA_ARGS__)
+    FOR_EACH_2P(IF_OS_SOCKET_CONNECT, \
+                inst, \
+                networkStack, \
+                __VA_ARGS__)
 
 // Assign a single badge; this is used internally
 #define NetworkStack_PicoTcp_BADGE_ASSIGNER( \

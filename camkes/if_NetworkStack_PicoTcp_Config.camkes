@@ -1,0 +1,55 @@
+/*
+ * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+/**
+ * @file
+ *
+ * CAmkES Interface for NetworkStack_PicoTcp operations.
+ *
+ * This file describes the NetworkStack_PicoTcp interface in terms of CAmkES
+ * connections.
+ */
+
+#pragma once
+
+/**
+ * The RPC interface to configure the stack.
+ *
+ * @hideinitializer
+ */
+procedure if_NetworkStack_PicoTcp_Config {
+
+    include "OS_Error.h";
+    include "OS_NetworkStack.h";
+
+    /**
+     * Configures the IP stack.
+     *
+     * @retval OS_SUCCESS                   Operation was successful.
+     * @retval OS_ERROR_INVALID_PARAMETER   If the configuration is NULL or
+     *                                      invalid.
+     *
+     * @param[in]   config  IP stack configuration.
+     */
+    OS_Error_t configIpAddr(
+        refin OS_NetworkStack_AddressConfig_t config);
+};
+
+
+//==============================================================================
+// Component interface fields macros
+//==============================================================================
+
+/**
+ * Declares the interface fields of a component implementing the user side of
+ * the if_NetworkStack_PicoTcp_Config interface.
+ *
+ * @param[in]   prefix  Prefix used to generate a unique name for the
+ *              connectors.
+ */
+#define if_NetworkStack_PicoTcp_Config_USE(prefix) \
+    \
+    uses    if_NetworkStack_PicoTcp_Config  prefix##_rpc;
+
