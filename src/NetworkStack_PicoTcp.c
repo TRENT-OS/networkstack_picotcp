@@ -49,8 +49,7 @@ networkStack_rpc_buf_size(seL4_Word client_id);
 int
 get_client_id(void)
 {
-    return networkStack_rpc_get_sender_id() -
-        networkStack_rpc_enumerate_badge(0);
+    return networkStack_rpc_get_sender_id();
 }
 
 uint8_t*
@@ -169,6 +168,7 @@ initializeNetworkStack(void)
     {
         clients[i].needsToBeNotified = false;
         clients[i].inUse = true;
+        clients[i].clientId = networkStack_rpc_enumerate_badge(i);
         clients[i].socketQuota = networkStack_config.clients[i].socket_quota;
         clients[i].currentSocketsInUse = 0;
         clients[i].tail = 0;
