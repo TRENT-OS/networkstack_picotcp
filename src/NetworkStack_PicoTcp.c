@@ -107,7 +107,7 @@ post_init(void)
 
 OS_Error_t
 if_config_rpc_configIpAddr(
-     const OS_NetworkStack_AddressConfig_t* pConfig)
+    const OS_NetworkStack_AddressConfig_t* pConfig)
 {
     if (!isValidIp4Address(pConfig->dev_addr) ||
         !isValidIp4Address(pConfig->gateway_addr) ||
@@ -222,12 +222,12 @@ initializeNetworkStack(void)
     for (int i = 0; i < numberConnectedClients; i++)
     {
         Debug_LOG_INFO("Client badge #%d",
-            networkStack_rpc_enumerate_badge(i));
+                       networkStack_rpc_enumerate_badge(i));
     }
 
     Debug_LOG_INFO("[NwStack '%s'] IP ADDR: %s",
-        get_instance_name(),
-        pIpAddrConfig->dev_addr);
+                   get_instance_name(),
+                   pIpAddrConfig->dev_addr);
     Debug_LOG_INFO(
         "[NwStack '%s'] GATEWAY ADDR: %s",
         get_instance_name(),
@@ -263,8 +263,8 @@ run(void)
     pIpAddrConfig = &config;
 #endif
 
-    while (NULL == pIpAddrConfig) // not yet ready, user has not yet
-                                          // configured the nwStack
+    while (NULL == pIpAddrConfig)
+        // Not yet ready, user has not yet configured the nwStack.
     {
         seL4_Yield();
     }
@@ -292,8 +292,8 @@ run(void)
 
 err:
     Debug_LOG_FATAL(
-            "[NwStack '%s'] OS_NetworkStack_run() failed, error %d",
-            get_instance_name(),
-            ret);
+        "[NwStack '%s'] OS_NetworkStack_run() failed, error %d",
+        get_instance_name(),
+        ret);
     return -1;
 }
