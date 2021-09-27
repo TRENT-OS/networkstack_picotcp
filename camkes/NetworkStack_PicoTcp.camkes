@@ -229,36 +229,34 @@ struct NetworkStack_Config {
 #define NetworkStack_PicoTcp_BADGE_ASSIGNER( \
     _unused0_, \
     _unused1_, \
-    _rpc_, \
+    _inst_user_, \
+    _inst_user_field_prefix_, \
     _num_) \
     \
-    _rpc_ ## _attributes = (100 + _num_);
+    _inst_user_._inst_user_field_prefix_ ## _rpc_attributes = (100 + _num_);
 
 /**
- * Assign all clients a badge, in the order in which they are connected to the
- * network stack instance via NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS():
+ * Assign a badge value to a client.
  *
  *      NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGE(
- *          <client_rpc>, <ID>
+ *          <inst_user1>, <inst_user1_prefix_if_os_socket>, <ID>
  *      )
- *
- * NOTE: IDs need to start at 101!
  *
  */
 #define NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGE( \
-    _rpc_, \
+    _inst_user_, \
+    _inst_user_field_prefix_, \
     _val_) \
     \
-    _rpc_ ## _attributes = _val_;
+    _inst_user_._inst_user_field_prefix_ ## _rpc_attributes = _val_;
 
 /**
  * Assign badges to a list of clients; badge IDs will start at 101 and then be
- * incremented. Make sure to pass clients in same order as they are passed
- * in the NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS() macro:
+ * incremented.
  *
  *      NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGES(
- *          <client0_rpc>,
- *          <client1_rpc>,
+ *          <inst_user1>, <inst_user1_prefix_if_os_socket>,
+ *          <inst_user2>, <inst_user2_prefix_if_os_socket>,
  *           ...
  *      )
  *
@@ -268,10 +266,10 @@ struct NetworkStack_Config {
 #define NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGES( \
     ...) \
     \
-    FOR_EACH_1P(NetworkStack_PicoTcp_BADGE_ASSIGNER,UNUSED,UNUSED,__VA_ARGS__)
+    FOR_EACH_2P(NetworkStack_PicoTcp_BADGE_ASSIGNER,UNUSED,UNUSED,__VA_ARGS__)
 
 /**
- * Configure all clients connected to a NetworkStack_PicoTc instance:
+ * Configure all clients connected to a NetworkStack_PicoTcp instance:
  *
  *      NetworkStack_PicoTcp_INSTANCE_CONFIGURE_CLIENTS(
  *          <instance>,

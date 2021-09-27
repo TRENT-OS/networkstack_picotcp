@@ -18,7 +18,7 @@ if_NetworkStack_PicoTcp_Config_t;
 /**
  * Assigns the correct RPC function pointers to a struct supposed to hold them.
  */
-#define if_NetworkStack_PicoTcp_Config_ASSIGN(_rpc_)                           \
+#define if_NetworkStack_PicoTcp_Config_ASSIGN(_prefix_)                        \
 {                                                                              \
-    .configIpAddr = _rpc_##_configIpAddr                                       \
+    .configIpAddr = _prefix_##_rpc_configIpAddr                                \
 }
