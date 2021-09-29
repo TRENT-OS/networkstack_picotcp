@@ -49,7 +49,7 @@ struct NetworkStack_Config {
  * client.
  */
 #define NetworkStack_PicoTcp_INSTANCE_CONFIGURATOR( \
-    _unused0, \
+    _unused0_, \
     _unused1_, \
     _socket_quota_, \
     _unused2_) \
