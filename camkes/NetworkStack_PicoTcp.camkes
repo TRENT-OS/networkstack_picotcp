@@ -74,8 +74,6 @@ struct NetworkStack_Config {
  *                             'type' name.
  * @param[in] nic_port_size    Size of the dataport to connect to the NIC driver
  *                             component.
- * @param[in] num_sockets      Number of socket connections that the network
- *                             stack can offer.
  * @param[in] other_interfaces Definitions of fields of additional interfaces to
  *                             which this component could connect to (e.g.: a
  *                             logger component to log its error messages).
@@ -83,7 +81,6 @@ struct NetworkStack_Config {
 #define NetworkStack_PicoTcp_COMPONENT_DEFINE( \
     name, \
     nic_port_size, \
-    num_sockets, \
     other_interfaces) \
     \
     component name \
