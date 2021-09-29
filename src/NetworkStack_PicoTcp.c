@@ -29,22 +29,10 @@ static const if_OS_Timer_t timer =
 static OS_NetworkStack_AddressConfig_t ipAddrConfig;
 static const OS_NetworkStack_AddressConfig_t* pIpAddrConfig = NULL;
 
-// TODO: Until the connector functions are declared in the camkes header, we
-// need to declare them here in order to use them.
-unsigned int
-networkStack_rpc_num_badges(void);
-
-seL4_Word
-networkStack_rpc_enumerate_badge(unsigned int i);
-
+// TODO: Until all the relevant connector functions are declared in the CAmkES
+// header, we need to declare the following function here in order to use it.
 seL4_Word
 networkStack_rpc_get_sender_id(void);
-
-void*
-networkStack_rpc_buf(seL4_Word client_id);
-
-size_t
-networkStack_rpc_buf_size(seL4_Word client_id);
 
 int
 get_client_id(void)
