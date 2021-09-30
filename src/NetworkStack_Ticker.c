@@ -23,7 +23,7 @@ int run(void)
         return -1;
     }
 
-    for(;;)
+    for (;;)
     {
         timeServer_notify_wait();
 
