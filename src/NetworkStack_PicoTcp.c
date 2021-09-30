@@ -4,8 +4,6 @@
  * Copyright (C) 2021, HENSOLDT Cyber GmbH
  */
 
-#include "system_config.h"
-
 #include "OS_Dataport.h"
 #include "OS_Error.h"
 #include "OS_Network.h"
@@ -14,7 +12,6 @@
 #include "TimeServer.h"
 #include "lib_macros/Array.h"
 #include "lib_debug/Debug.h"
-#include "util/loop_defines.h"
 
 #include <camkes.h>
 #include <string.h>
