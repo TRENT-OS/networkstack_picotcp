@@ -205,12 +205,12 @@ initializeNetworkStack(void)
         }
     };
 
-    Debug_LOG_INFO("Clients connected %d", numberConnectedClients);
+    Debug_LOG_DEBUG("Clients connected: %d", numberConnectedClients);
 
     for (int i = 0; i < numberConnectedClients; i++)
     {
-        Debug_LOG_INFO("Client badge #%d",
-                       networkStack_rpc_enumerate_badge(i));
+        Debug_LOG_DEBUG("Client[%d] badge #%d",
+                        i, networkStack_rpc_enumerate_badge(i));
     }
 
     Debug_LOG_INFO("[NwStack '%s'] IP ADDR: %s",

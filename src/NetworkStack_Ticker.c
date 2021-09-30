@@ -13,7 +13,7 @@
 //------------------------------------------------------------------------------
 int run(void)
 {
-    Debug_LOG_INFO("ticker running");
+    Debug_LOG_INFO("Ticker running");
 
     // set up a tick every second
     int ret = timeServer_rpc_periodic(0, NS_IN_S);
