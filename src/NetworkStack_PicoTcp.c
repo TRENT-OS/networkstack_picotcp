@@ -26,10 +26,38 @@ static const if_OS_Timer_t timer =
 static OS_NetworkStack_AddressConfig_t ipAddrConfig;
 static const OS_NetworkStack_AddressConfig_t* pIpAddrConfig = NULL;
 
+volatile static OS_NetworkStack_State_t currentState = UNINITIALIZED;
+
 // TODO: Until all the relevant connector functions are declared in the CAmkES
 // header, we need to declare the following function here in order to use it.
 seL4_Word
 networkStack_rpc_get_sender_id(void);
+
+// TODO: With the current implementation these function definitions are exported
+// to the library so it can make use of them. Therefore they cannot be set to
+// static. This should reworked into a nicer solution that allows for a cleaner
+// separation of the state management from the underlying library.
+OS_NetworkStack_State_t
+networkStack_getState(void)
+{
+    return currentState;
+}
+
+OS_Error_t
+networkStack_setState(OS_NetworkStack_State_t state)
+{
+    switch (state)
+    {
+    case UNINITIALIZED:
+    case INITIALIZED:
+    case RUNNING:
+    case FATAL_ERROR:
+        currentState = state;
+        return OS_SUCCESS;
+    default:
+        return OS_ERROR_INVALID_PARAMETER;
+    }
+}
 
 int
 get_client_id(void)
@@ -93,6 +121,12 @@ OS_Error_t
 if_config_rpc_configIpAddr(
     const OS_NetworkStack_AddressConfig_t* pConfig)
 {
+    OS_NetworkStack_State_t currentState = networkStack_getState();
+    if (currentState != UNINITIALIZED)
+    {
+        return OS_ERROR_INVALID_STATE;
+    }
+
     if (!isValidIp4Address(pConfig->dev_addr) ||
         !isValidIp4Address(pConfig->gateway_addr) ||
         !isValidIp4Address(pConfig->subnet_mask))
@@ -238,6 +272,7 @@ initializeNetworkStack(void)
 int
 run(void)
 {
+    networkStack_setState(UNINITIALIZED);
 #if defined(NetworkStack_PicoTcp_USE_HARDCODED_IPADDR)
     static const OS_NetworkStack_AddressConfig_t config =
     {
@@ -259,7 +294,11 @@ run(void)
     {
         goto err;
     }
+    // Set the INITIALIZED state to have a clean transition even though it would
+    // be possible to directly transition to RUNNING here.
+    networkStack_setState(INITIALIZED);
 
+    networkStack_setState(RUNNING);
     ret = OS_NetworkStack_run();
     if (ret != OS_SUCCESS)
     {
@@ -273,9 +312,14 @@ run(void)
         "[NwStack '%s'] graceful termination",
         get_instance_name());
 
+    // Set FATAL_ERROR to let connected clients know that the component will not
+    // come back up again.
+    networkStack_setState(FATAL_ERROR);
+
     return 0;
 
 err:
+    networkStack_setState(FATAL_ERROR);
     Debug_LOG_FATAL(
         "[NwStack '%s'] OS_NetworkStack_run() failed, error %d",
         get_instance_name(),

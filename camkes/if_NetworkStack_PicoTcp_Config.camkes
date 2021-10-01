@@ -28,6 +28,8 @@ procedure if_NetworkStack_PicoTcp_Config {
      * Configures the IP stack.
      *
      * @retval OS_SUCCESS                   Operation was successful.
+     * @retval OS_ERROR_INVALID_STATE       If the stack is not in the
+     *                                      UNINITIALIZED state.
      * @retval OS_ERROR_INVALID_PARAMETER   If the configuration is NULL or
      *                                      invalid.
      *
