@@ -32,6 +32,8 @@ procedure if_NetworkStack_PicoTcp_Config {
      *                                      UNINITIALIZED state.
      * @retval OS_ERROR_INVALID_PARAMETER   If the configuration is NULL or
      *                                      invalid.
+     * @retval OS_ERROR_OPERATION_DENIED    If the stack configuration is
+     *                                      already set at compile time.
      *
      * @param[in]   config  IP stack configuration.
      */

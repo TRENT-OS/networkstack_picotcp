@@ -23,7 +23,9 @@
 static const if_OS_Timer_t timer =
     IF_OS_TIMER_ASSIGN(internal_timeServer_rpc, internal_timeServer_notify);
 
+#if !defined(NetworkStack_PicoTcp_USE_HARDCODED_IPADDR)
 static OS_NetworkStack_AddressConfig_t ipAddrConfig;
+#endif
 static const OS_NetworkStack_AddressConfig_t* pIpAddrConfig = NULL;
 
 volatile static OS_NetworkStack_State_t currentState = UNINITIALIZED;
@@ -121,6 +123,7 @@ OS_Error_t
 if_config_rpc_configIpAddr(
     const OS_NetworkStack_AddressConfig_t* pConfig)
 {
+#if !defined(NetworkStack_PicoTcp_USE_HARDCODED_IPADDR)
     OS_NetworkStack_State_t currentState = networkStack_getState();
     if (currentState != UNINITIALIZED)
     {
@@ -136,6 +139,9 @@ if_config_rpc_configIpAddr(
     memcpy(&ipAddrConfig, pConfig, sizeof(ipAddrConfig));
     pIpAddrConfig = &ipAddrConfig;
     return OS_SUCCESS;
+#else
+    return OS_ERROR_OPERATION_DENIED;
+#endif
 }
 
 OS_Error_t
