@@ -51,8 +51,11 @@ networkStack_setState(OS_NetworkStack_State_t state)
     switch (state)
     {
     case UNINITIALIZED:
+        __attribute__ ((fallthrough));
     case INITIALIZED:
+        __attribute__ ((fallthrough));
     case RUNNING:
+        __attribute__ ((fallthrough));
     case FATAL_ERROR:
         currentState = state;
         return OS_SUCCESS;
