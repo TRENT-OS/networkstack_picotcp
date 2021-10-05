@@ -20,6 +20,10 @@
 // interface.
 #define MAX_CLIENTS_NUM 8
 
+#ifdef USE_LOGSERVER
+static OS_LoggerFilter_Handle_t filter;
+#endif
+
 static const if_OS_Timer_t timer =
     IF_OS_TIMER_ASSIGN(internal_timeServer_rpc, internal_timeServer_notify);
 
@@ -111,8 +115,14 @@ Timer_getTimeMs(void)
 void
 pre_init(void)
 {
-    // TODO: Currently intentionally left blank. Check if needed after we
-    // defined the final form of the connector.
+#ifdef USE_LOGSERVER
+    OS_LoggerFilter_ctor(&filter, LOGSERVER_CLIENT_LEVEL_FILTER);
+
+    OS_LoggerEmitter_getInstance(
+        LOGSERVER_DATAPORT,
+        &filter,
+        API_LOG_SERVER_EMIT);
+#endif
 }
 
 void

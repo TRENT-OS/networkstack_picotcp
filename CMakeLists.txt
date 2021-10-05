@@ -36,19 +36,21 @@ function(NetworkStack_PicoTcp_DeclareCAmkESComponent
         NETWORKSTACK_EXTRA
         ""
         ""
-        "C_FLAGS"
+        "SOURCES;C_FLAGS;INCLUDES;LIBS"
     )
 
     #---------------------------------------------------------------------------
     DeclareCAmkESComponent(${name}
         SOURCES
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/NetworkStack_PicoTcp.c
+            ${NETWORKSTACK_EXTRA_SOURCES}
         C_FLAGS
             -Wall
             -Werror
             ${NETWORKSTACK_EXTRA_C_FLAGS}
         INCLUDES
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/
+            ${NETWORKSTACK_EXTRA_INCLUDES}
         LIBS
             os_network_lib
             os_core_api
@@ -57,6 +59,7 @@ function(NetworkStack_PicoTcp_DeclareCAmkESComponent
             lib_server
             TimeServer_client
             system_config
+            ${NETWORKSTACK_EXTRA_LIBS}
     )
 
     DeclareCAmkESComponent(
