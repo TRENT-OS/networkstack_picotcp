@@ -20,6 +20,12 @@
 // interface.
 #define MAX_CLIENTS_NUM 8
 
+// The NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGE() macro will start assigning
+// badge numbers with the minimum value below. Adjusting the value below will
+// also require an adaptation in the main CAmkES file of this component for the
+// above mentioned macro.
+#define MIN_BADGE_ID 101
+
 #ifdef USE_LOGSERVER
 static OS_LoggerFilter_Handle_t filter;
 #endif
@@ -204,9 +210,29 @@ initializeNetworkStack(void)
 
     for (int i = 0; i < numberConnectedClients; i++)
     {
+        Debug_LOG_DEBUG(
+                "[NwStack '%s'] clientId (%d): %d, Min: %d, Max: %d",
+                get_instance_name(),
+                i,
+                networkStack_rpc_enumerate_badge(i),
+                MIN_BADGE_ID,
+                MIN_BADGE_ID + numberConnectedClients - 1);
+
+        if ((networkStack_rpc_enumerate_badge(i) < MIN_BADGE_ID) ||
+            (networkStack_rpc_enumerate_badge(i) >= MIN_BADGE_ID + numberConnectedClients))
+        {
+            Debug_LOG_ERROR(
+                "[NwStack '%s'] Badge Id is out of bounds: %d, Min: %d, Max: %d",
+                get_instance_name(),
+                networkStack_rpc_enumerate_badge(i),
+                MIN_BADGE_ID,
+                MIN_BADGE_ID + numberConnectedClients - 1);
+            return OS_ERROR_OUT_OF_BOUNDS;
+        }
+
         clients[i].needsToBeNotified = false;
         clients[i].inUse = true;
-        clients[i].clientId = networkStack_rpc_enumerate_badge(i);
+        clients[i].clientId = MIN_BADGE_ID + i;
         clients[i].socketQuota = networkStack_config.clients[i].socket_quota;
         clients[i].currentSocketsInUse = 0;
         clients[i].tail = 0;
