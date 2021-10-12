@@ -16,8 +16,8 @@
 #include <camkes.h>
 #include <string.h>
 
-// TODO: Update comment with constraints when we have the final form of the
-// interface.
+// In its current implementation, the component supports a maximum of 8 clients
+// to be connected to it.
 #define MAX_CLIENTS_NUM 8
 
 // The NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGE() macro will start assigning
@@ -211,12 +211,12 @@ initializeNetworkStack(void)
     for (int i = 0; i < numberConnectedClients; i++)
     {
         Debug_LOG_DEBUG(
-                "[NwStack '%s'] clientId (%d): %d, Min: %d, Max: %d",
-                get_instance_name(),
-                i,
-                networkStack_rpc_enumerate_badge(i),
-                MIN_BADGE_ID,
-                MIN_BADGE_ID + numberConnectedClients - 1);
+            "[NwStack '%s'] clientId (%d): %d, Min: %d, Max: %d",
+            get_instance_name(),
+            i,
+            networkStack_rpc_enumerate_badge(i),
+            MIN_BADGE_ID,
+            MIN_BADGE_ID + numberConnectedClients - 1);
 
         if ((networkStack_rpc_enumerate_badge(i) < MIN_BADGE_ID) ||
             (networkStack_rpc_enumerate_badge(i) >= MIN_BADGE_ID + numberConnectedClients))
