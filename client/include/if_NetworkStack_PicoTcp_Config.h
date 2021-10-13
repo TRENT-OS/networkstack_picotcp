@@ -6,7 +6,7 @@
 #pragma once
 
 #include "OS_Error.h"
-#include "OS_NetworkStack.h"
+#include "OS_Network.h"
 
 typedef struct
 {

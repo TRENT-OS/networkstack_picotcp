@@ -12,7 +12,6 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <arpa/inet.h>
 
 #include "OS_Dataport.h"
 
@@ -98,13 +97,6 @@ typedef struct
     } drv_nic;
 
 } OS_NetworkStack_CamkesConfig_t;
-
-typedef struct
-{
-    char dev_addr[INET_ADDRSTRLEN];     /**< device address, e.g. tap0, tap1 */
-    char gateway_addr[INET_ADDRSTRLEN]; /**< gateway addr */
-    char subnet_mask[INET_ADDRSTRLEN];  /**< subnet mask */
-} OS_NetworkStack_AddressConfig_t;
 
 /**
  * @brief Initialize network stack
