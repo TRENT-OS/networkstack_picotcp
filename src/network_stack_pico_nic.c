@@ -9,7 +9,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "OS_Network.h"
 #include "OS_Types.h"
 #include "network_config.h"
 #include "network/OS_NetworkStack.h"

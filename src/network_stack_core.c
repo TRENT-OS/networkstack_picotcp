@@ -8,7 +8,6 @@
  */
 
 #include "lib_debug/Debug.h"
-#include "OS_Network.h"
 #include "network/OS_NetworkStack.h"
 #include "network/OS_Network_types.h"
 #include "NetworkStack.h"
