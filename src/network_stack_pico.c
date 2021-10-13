@@ -1,7 +1,7 @@
 /*
  * OS Network Stack
  *
- * The PicoTCP implementation of the TRENTOS-M Network Stack.
+ * The picoTCP implementation of the TRENTOS-M Network Stack.
  *
  * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
@@ -213,7 +213,7 @@ helper_socket_set_option_int(
 
 
 //------------------------------------------------------------------------------
-// This is called from the PicoTCP main tick loop to report socket events
+// This is called from the picoTCP main tick loop to report socket events
 static void
 handle_pico_socket_event(
     uint16_t            event_mask,
@@ -379,7 +379,7 @@ network_stack_pico_socket_create(
     internal_network_stack_thread_safety_mutex_unlock();
     if (NULL == pico_socket)
     {
-        // try to detailed error from PicoTCP. Actually, nw_socket_open()
+        // try to detailed error from picoTCP. Actually, nw_socket_open()
         // should return a proper error code and populate a handle passed as
         // pointer parameter, so we don't need to access pico_err here.
         Debug_LOG_ERROR("socket opening failed, pico_err = %d (%s)",
@@ -672,7 +672,7 @@ network_stack_pico_socket_accept(
     }
 
     // The default values below are taken from the TCP unit tests of
-    // PicoTCP, see tests/examples/tcpecho.c
+    // picoTCP, see tests/examples/tcpecho.c
 
     helper_socket_set_option_int(
         s_in,
@@ -804,7 +804,7 @@ network_stack_pico_socket_read(
     socket->current_error = err;
     internal_network_stack_thread_safety_mutex_unlock();
 
-    // Encountered a read error in picoTcp.
+    // Encountered a read error in picoTCP.
     if (ret < 0)
     {
         if (err == OS_ERROR_NETWORK_CONN_SHUTDOWN)
@@ -951,7 +951,7 @@ network_stack_pico_socket_recvfrom(
     socket->current_error = err;
     internal_network_stack_thread_safety_mutex_unlock();
 
-    // Encountered a read error in picoTcp.
+    // Encountered a read error in picoTCP.
     if (ret < 0)
     {
         Debug_LOG_ERROR(

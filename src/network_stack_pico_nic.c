@@ -1,7 +1,7 @@
 /*
  * OS Network Stack
  *
- * NIC level functions for the PicoTCP implementation of the network stack.
+ * NIC level functions for the picoTCP implementation of the network stack.
  *
  * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
@@ -20,7 +20,7 @@
 static struct pico_device os_nic;
 
 //------------------------------------------------------------------------------
-// Called by PicoTCP to send one frame
+// Called by picoTCP to send one frame
 static int
 nic_send_frame(
     struct pico_device*  dev,
@@ -83,7 +83,7 @@ nic_send_frame(
 
 
 //------------------------------------------------------------------------------
-// Called after notification from driver and regularly from PicoTCP stack tick
+// Called after notification from driver and regularly from picoTCP stack tick
 static int
 nic_poll_data(
     struct pico_device*  dev,
@@ -116,7 +116,7 @@ nic_poll_data(
                     if (isDetectionDone == true)
                     {
                         // There is no return value we can give here which signals to the
-                        // picotcp stack that an error ocurred. The loop value we return
+                        // picoTCP stack that an error ocurred. The loop value we return
                         // here is fed to a LSFR to generate randomness.
                         // Since this error should never happen we consider it fatal and stop
                         // execution here.
@@ -233,7 +233,7 @@ pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
         return OS_ERROR_GENERIC;
     }
 
-    Debug_LOG_INFO("PicoTCP Device created: %s", drv_name);
+    Debug_LOG_INFO("picoTCP Device created: %s", drv_name);
 
     //---------------------------------------------------------------
     // assign IPv4 configuration

@@ -16,7 +16,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 
-# Include the PicoTCP project, but do not build any targets from it unless they
+# Include the picoTCP project, but do not build any targets from it unless they
 # are explicitly included.
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/3rdParty/picotcp EXCLUDE_FROM_ALL)
 

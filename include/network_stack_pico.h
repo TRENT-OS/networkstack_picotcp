@@ -1,7 +1,7 @@
 /*
  * OS Network Stack
  *
- * The PicoTCP implementation of the TRENTOS-M Network Stack.
+ * The picoTCP implementation of the TRENTOS-M Network Stack.
  *
  * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */

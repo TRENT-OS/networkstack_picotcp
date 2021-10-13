@@ -1,2 +1,2 @@
-# Network Stack component using PicoTcp
+# Network Stack component using picoTCP
 

@@ -1,7 +1,7 @@
 /*
  * OS Network Stack
  *
- * NIC level functions for the PicoTCP implementation of the network stack.
+ * NIC level functions for the picoTCP implementation of the network stack.
  *
  * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
