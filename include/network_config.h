@@ -8,7 +8,7 @@
 
 #include "OS_Types.h"
 #include "OS_Dataport.h"
-#include "OS_NetworkStack.h"
+#include "NetworkStack.h"
 #include <stddef.h>
 
 typedef OS_Error_t (*nic_initialize_func_t)(
@@ -23,7 +23,7 @@ typedef struct
     stack_tick_func_t stack_tick;
 } network_stack_interface_t;
 
-const OS_NetworkStack_CamkesConfig_t* config_get_handlers(void);
+const NetworkStack_CamkesConfig_t* config_get_handlers(void);
 
 //------------------------------------------------------------------------------
 // System interface

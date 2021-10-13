@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "OS_Network.h"
+#include "NetworkStack.h"
 #include "network/OS_Network_types.h"
 #include "network_config.h"
 #include "network_stack_core.h"
@@ -254,7 +254,7 @@ handle_pico_socket_event(
         return;
     }
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
     if (NULL == socket)
     {
         Debug_LOG_ERROR("%s: failed to get socket from handle %d",
@@ -342,8 +342,8 @@ handle_pico_socket_event(
         }
     }
 
-    OS_NetworkStack_Client_t* client = get_client_from_clientId(
-                                           socket->clientId);
+    NetworkStack_Client_t* client = get_client_from_clientId(
+                                        socket->clientId);
 
     client->needsToBeNotified = true;
 }
@@ -415,7 +415,7 @@ network_stack_pico_socket_create(
         return OS_ERROR_INSUFFICIENT_SPACE;
     }
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     socket->buf_io    = buffer;
     OS_Dataport_t tmp = OS_DATAPORT_ASSIGN_SIZE(socket->buf_io, buffer_size);
@@ -460,7 +460,7 @@ network_stack_pico_socket_close(
     const int handle,
     const int clientId)
 {
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
     struct pico_socket* pico_socket = socket->implementation_socket;
 
     if (!(socket->eventMask & OS_SOCK_EV_FIN))
@@ -497,7 +497,7 @@ network_stack_pico_socket_connect(
     const int                            handle,
     const OS_NetworkSocket_Addr_t* const dstAddr)
 {
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
     {
@@ -541,7 +541,7 @@ network_stack_pico_socket_bind(
     const int                            handle,
     const OS_NetworkSocket_Addr_t* const localAddr)
 {
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
     {
@@ -586,7 +586,7 @@ network_stack_pico_socket_listen(
     const int handle,
     const int backlog)
 {
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
     {
@@ -623,7 +623,7 @@ network_stack_pico_socket_accept(
     uint16_t        port = 0;
     struct pico_ip4 orig = { 0 };
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
     {
@@ -718,7 +718,7 @@ network_stack_pico_socket_accept(
     Debug_LOG_DEBUG("[socket %d/%p] incoming connection socket %d/%p",
                     handle, pico_socket, *pClient_handle, client_socket);
 
-    OS_NetworkStack_SocketResources_t* socket_client;
+    NetworkStack_SocketResources_t* socket_client;
 
     socket_client = get_socket_from_handle(*pClient_handle);
 
@@ -737,7 +737,7 @@ network_stack_pico_socket_write(
     const int     handle,
     size_t* const pLen)
 {
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
     {
@@ -781,7 +781,7 @@ network_stack_pico_socket_read(
     const int     handle,
     size_t* const pLen)
 {
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
     {
@@ -866,7 +866,7 @@ network_stack_pico_socket_sendto(
     size_t* const                        pLen,
     const OS_NetworkSocket_Addr_t* const dstAddr)
 {
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
     {
@@ -923,7 +923,7 @@ network_stack_pico_socket_recvfrom(
     size_t* const                  pLen,
     OS_NetworkSocket_Addr_t* const srcAddr)
 {
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
     {

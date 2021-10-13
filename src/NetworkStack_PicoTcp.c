@@ -7,11 +7,12 @@
 #include "OS_Dataport.h"
 #include "OS_Error.h"
 #include "OS_Network.h"
-#include "OS_NetworkStack.h"
 
 #include "TimeServer.h"
 #include "lib_macros/Array.h"
 #include "lib_debug/Debug.h"
+
+#include "NetworkStack.h"
 
 #include <camkes.h>
 #include <string.h>
@@ -192,7 +193,7 @@ initializeNetworkStack(void)
         return OS_ERROR_OUT_OF_BOUNDS;;
     }
 
-    static OS_NetworkStack_SocketResources_t sockets[OS_NETWORK_MAXIMUM_SOCKET_NO];
+    static NetworkStack_SocketResources_t sockets[OS_NETWORK_MAXIMUM_SOCKET_NO];
 
     static const event_notify_func_t notifications[MAX_CLIENTS_NUM] =
     {
@@ -206,7 +207,7 @@ initializeNetworkStack(void)
         networkStack_8_event_notify_emit
     };
 
-    static OS_NetworkStack_Client_t clients[MAX_CLIENTS_NUM] = {0};
+    static NetworkStack_Client_t clients[MAX_CLIENTS_NUM] = {0};
 
     for (int i = 0; i < numberConnectedClients; i++)
     {
@@ -240,7 +241,7 @@ initializeNetworkStack(void)
         clients[i].eventNotify = notifications[i];
     }
 
-    static const OS_NetworkStack_CamkesConfig_t camkesConfig =
+    static const NetworkStack_CamkesConfig_t camkesConfig =
     {
         .wait_loop_event         = event_tick_or_data_wait,
 
@@ -301,11 +302,11 @@ initializeNetworkStack(void)
         get_instance_name(),
         pIpAddrConfig->subnet_mask);
 
-    OS_Error_t ret = OS_NetworkStack_init(&camkesConfig, pIpAddrConfig);
+    OS_Error_t ret = NetworkStack_init(&camkesConfig, pIpAddrConfig);
     if (ret != OS_SUCCESS)
     {
         Debug_LOG_FATAL(
-            "[NwStack '%s'] OS_NetworkStack_init() failed, error %d",
+            "[NwStack '%s'] NetworkStack_init() failed, error %d",
             get_instance_name(),
             ret);
     }
@@ -344,13 +345,13 @@ run(void)
     networkStack_setState(INITIALIZED);
 
     networkStack_setState(RUNNING);
-    ret = OS_NetworkStack_run();
+    ret = NetworkStack_run();
     if (ret != OS_SUCCESS)
     {
         goto err;
     }
 
-    // Actually, OS_NetworkStack_run() is not supposed to return with
+    // Actually, NetworkStack_run() is not supposed to return with
     // OS_SUCCESS. We have to assume this is a graceful shutdown for some
     // reason.
     Debug_LOG_WARNING(
@@ -366,7 +367,7 @@ run(void)
 err:
     networkStack_setState(FATAL_ERROR);
     Debug_LOG_FATAL(
-        "[NwStack '%s'] OS_NetworkStack_run() failed, error %d",
+        "[NwStack '%s'] NetworkStack_run() failed, error %d",
         get_instance_name(),
         ret);
     return -1;

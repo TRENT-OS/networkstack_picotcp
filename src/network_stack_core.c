@@ -9,10 +9,9 @@
 
 #include "lib_debug/Debug.h"
 #include "OS_Network.h"
-#include "OS_NetworkStack.h"
 #include "network/OS_NetworkStack.h"
 #include "network/OS_Network_types.h"
-#include "OS_NetworkStack.h"
+#include "NetworkStack.h"
 #include "network_config.h"
 #include "network_stack_core.h"
 #include "network_stack_pico.h"
@@ -32,10 +31,10 @@ extern OS_NetworkStack_State_t networkStack_getState();
 
 typedef struct
 {
-    const OS_NetworkStack_CamkesConfig_t* camkes_cfg;
+    const NetworkStack_CamkesConfig_t* camkes_cfg;
     const OS_NetworkStack_AddressConfig_t* cfg;
-    OS_NetworkStack_SocketResources_t* sockets;
-    OS_NetworkStack_Client_t* clients;
+    NetworkStack_SocketResources_t* sockets;
+    NetworkStack_Client_t* clients;
 
     int number_of_sockets;
     int number_of_clients;
@@ -45,10 +44,10 @@ typedef struct
 static network_stack_t instance = {0};
 
 //------------------------------------------------------------------------------
-const OS_NetworkStack_CamkesConfig_t*
+const NetworkStack_CamkesConfig_t*
 config_get_handlers(void)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = instance.camkes_cfg;
+    const NetworkStack_CamkesConfig_t* handlers = instance.camkes_cfg;
 
     Debug_ASSERT( NULL != handlers );
 
@@ -84,7 +83,7 @@ networkStack_rpc_socket_close(
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
 
@@ -102,7 +101,7 @@ networkStack_rpc_socket_connect(
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
 
@@ -124,7 +123,7 @@ networkStack_rpc_socket_bind(
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
 
@@ -146,7 +145,7 @@ networkStack_rpc_socket_listen(
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
 
@@ -167,7 +166,7 @@ networkStack_rpc_socket_accept(
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
 
@@ -189,7 +188,7 @@ networkStack_rpc_socket_write(
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
 
@@ -208,7 +207,7 @@ networkStack_rpc_socket_read(
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
 
@@ -228,7 +227,7 @@ networkStack_rpc_socket_sendto(
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
 
@@ -250,7 +249,7 @@ networkStack_rpc_socket_recvfrom(
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
-    OS_NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+    NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
 
@@ -637,7 +636,8 @@ notify_clients_about_pending_events(
             {
                 if (NULL != instance.clients[i].eventNotify)
                 {
-                    Debug_LOG_ERROR("Notify client %d, clientId: %d", i, instance.clients[i].clientId);
+                    Debug_LOG_ERROR("Notify client %d, clientId: %d", i,
+                                    instance.clients[i].clientId);
                     instance.clients[i].eventNotify();
                 }
                 else
@@ -653,8 +653,8 @@ notify_clients_about_pending_events(
 
 //------------------------------------------------------------------------------
 OS_Error_t
-OS_NetworkStack_init(
-    const OS_NetworkStack_CamkesConfig_t* const camkes_config,
+NetworkStack_init(
+    const NetworkStack_CamkesConfig_t* const camkes_config,
     const OS_NetworkStack_AddressConfig_t* const config)
 {
     if ((NULL == camkes_config) || (NULL == config))
@@ -692,7 +692,7 @@ OS_NetworkStack_init(
 //------------------------------------------------------------------------------
 // CAmkES run()
 OS_Error_t
-OS_NetworkStack_run(void)
+NetworkStack_run(void)
 {
     if ((NULL == instance.camkes_cfg) || (NULL == instance.cfg))
     {

@@ -33,7 +33,7 @@ typedef struct
     int tail;
 
     event_notify_func_t eventNotify;
-} OS_NetworkStack_Client_t;
+} NetworkStack_Client_t;
 
 typedef struct
 {
@@ -52,7 +52,7 @@ typedef struct
     OS_Dataport_t buf;
 
     void* implementation_socket;
-} OS_NetworkStack_SocketResources_t;
+} NetworkStack_SocketResources_t;
 
 typedef struct
 {
@@ -62,9 +62,9 @@ typedef struct
     {
         event_notify_func_t notify_loop; // -> wait_event
 
-        OS_NetworkStack_SocketResources_t* sockets;
+        NetworkStack_SocketResources_t* sockets;
 
-        OS_NetworkStack_Client_t* clients;
+        NetworkStack_Client_t* clients;
 
         int number_of_sockets;
         int number_of_clients;
@@ -96,7 +96,7 @@ typedef struct
         } rpc;
     } drv_nic;
 
-} OS_NetworkStack_CamkesConfig_t;
+} NetworkStack_CamkesConfig_t;
 
 /**
  * @brief Initialize network stack
@@ -111,8 +111,8 @@ typedef struct
  * @retval OS_ERROR_INVALID_PARAMETER if a parameter was missing or invalid
  */
 OS_Error_t
-OS_NetworkStack_init(
-    const OS_NetworkStack_CamkesConfig_t* camkes_config,
+NetworkStack_init(
+    const NetworkStack_CamkesConfig_t* camkes_config,
     const OS_NetworkStack_AddressConfig_t* config);
 
 /**
@@ -121,7 +121,7 @@ OS_NetworkStack_init(
  *
  * @return an error code
  * @retval OS_SUCCESS if gracefully stopped
- * @retval OS_ERROR_INVALID_STATE if not initialized (see OS_NetworkStack_init())
+ * @retval OS_ERROR_INVALID_STATE if not initialized (see NetworkStack_init())
  */
 OS_Error_t
-OS_NetworkStack_run(void);
+NetworkStack_run(void);

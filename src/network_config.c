@@ -7,7 +7,7 @@
 #include "OS_Types.h"
 #include "OS_Dataport.h"
 #include "lib_debug/Debug.h"
-#include "OS_NetworkStack.h"
+#include "NetworkStack.h"
 #include "network_config.h"
 #include "network_stack_core.h"
 #include <stddef.h>
@@ -18,7 +18,7 @@ wait_network_event(void)
 {
     Debug_LOG_TRACE("wait_network_event for handle");
 
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     event_wait_func_t do_wait = handlers->wait_loop_event;
     if (!do_wait)
@@ -37,7 +37,7 @@ internal_notify_main_loop(void)
 {
     Debug_LOG_TRACE("internal_notify_main_loop for handle");
 
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     event_notify_func_t do_notify = handlers->internal.notify_loop;
     if (!do_notify)
@@ -54,7 +54,7 @@ internal_notify_main_loop(void)
 const OS_Dataport_t*
 get_nic_port_from(void)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     // network stack -> driver (aka output)
     const OS_Dataport_t* port = &(handlers->drv_nic.from);
@@ -71,7 +71,7 @@ get_nic_port_from(void)
 const OS_Dataport_t*
 get_nic_port_to(void)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     // driver -> network stack (aka input)
     const OS_Dataport_t* port = &(handlers->drv_nic.to);
@@ -89,7 +89,7 @@ nic_dev_read(
     size_t* pLen,
     size_t* frameRemaining)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     Debug_ASSERT( NULL != handlers->drv_nic.rpc.dev_read );
 
@@ -102,7 +102,7 @@ OS_Error_t
 nic_dev_write(
     size_t* pLen)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     Debug_ASSERT( NULL != handlers->drv_nic.rpc.dev_write );
 
@@ -114,7 +114,7 @@ nic_dev_write(
 OS_Error_t
 nic_dev_get_mac_address(void)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     Debug_ASSERT( NULL != handlers->drv_nic.rpc.get_mac );
 
@@ -126,7 +126,7 @@ nic_dev_get_mac_address(void)
 void
 internal_socket_control_block_mutex_lock(void)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     mutex_lock_func_t lock_mutex = handlers->internal.socketCB_lock;
     if (!lock_mutex)
@@ -142,7 +142,7 @@ internal_socket_control_block_mutex_lock(void)
 //------------------------------------------------------------------------------
 void internal_socket_control_block_mutex_unlock(void)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     mutex_unlock_func_t unlock_mutex = handlers->internal.socketCB_unlock;
     if (!unlock_mutex)
@@ -158,7 +158,7 @@ void internal_socket_control_block_mutex_unlock(void)
 //------------------------------------------------------------------------------
 void internal_network_stack_thread_safety_mutex_lock(void)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     mutex_lock_func_t lock_mutex = handlers->internal.stackTS_lock;
     if (!lock_mutex)
@@ -174,7 +174,7 @@ void internal_network_stack_thread_safety_mutex_lock(void)
 //------------------------------------------------------------------------------
 void internal_network_stack_thread_safety_mutex_unlock(void)
 {
-    const OS_NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
+    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
     mutex_unlock_func_t unlock_mutex = handlers->internal.stackTS_unlock;
     if (!unlock_mutex)
