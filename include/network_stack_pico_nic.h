@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "OS_Types.h"
 #include "OS_Error.h"
+#include "OS_Types.h"
 
 OS_Error_t
 pico_nic_initialize(

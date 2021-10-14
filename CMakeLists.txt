@@ -50,7 +50,7 @@ function(NetworkStack_PicoTcp_DeclareCAmkESComponent
         SOURCES
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/NetworkStack_PicoTcp.c
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/network_stack_core.c
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/network_config.c
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/network_stack_config.c
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/network_stack_pico.c
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/network_stack_pico_nic.c
             ${NETWORKSTACK_EXTRA_SOURCES}

@@ -4,12 +4,14 @@
  * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  */
 
-#include "OS_Types.h"
 #include "OS_Dataport.h"
+#include "OS_Types.h"
+
 #include "lib_debug/Debug.h"
-#include "NetworkStack.h"
-#include "network_config.h"
+
+#include "network_stack_config.h"
 #include "network_stack_core.h"
+
 #include <stddef.h>
 
 //------------------------------------------------------------------------------

@@ -10,11 +10,13 @@
 
 #include "OS_Network.h"
 #include "network/OS_Network_types.h"
-#include "network_config.h"
+
+#include "network_stack_core.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 
-network_stack_interface_t
+NetworkStack_Interface_t
 network_stack_pico_get_config(void);
 
 OS_Error_t

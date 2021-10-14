@@ -7,16 +7,17 @@
  * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  */
 
-#include "lib_debug/Debug.h"
 #include "network/OS_NetworkStack.h"
 #include "network/OS_Network_types.h"
-#include "NetworkStack.h"
-#include "network_config.h"
+
+#include "lib_macros/Check.h"
+
+#include "network_stack_config.h"
 #include "network_stack_core.h"
 #include "network_stack_pico.h"
+
 #include <stdlib.h>
 #include <stdint.h>
-#include "lib_macros/Check.h"
 
 #define SOCKET_FREE   0
 #define SOCKET_IN_USE 1
@@ -28,19 +29,8 @@
 // component.
 extern OS_NetworkStack_State_t networkStack_getState();
 
-typedef struct
-{
-    const NetworkStack_CamkesConfig_t* camkes_cfg;
-    const OS_NetworkStack_AddressConfig_t* cfg;
-    NetworkStack_SocketResources_t* sockets;
-    NetworkStack_Client_t* clients;
-
-    int number_of_sockets;
-    int number_of_clients;
-} network_stack_t;
-
 // network stack state
-static network_stack_t instance = {0};
+static NetworkStack_t instance = {0};
 
 //------------------------------------------------------------------------------
 const NetworkStack_CamkesConfig_t*
@@ -672,7 +662,7 @@ NetworkStack_init(
         = camkes_config->internal.number_of_clients;
     instance.clients    = instance.camkes_cfg->internal.clients;
 
-    network_stack_interface_t network_stack = network_stack_pico_get_config();
+    NetworkStack_Interface_t network_stack = network_stack_pico_get_config();
 
     // initialize Network Stack and set API functions
     network_stack.stack_init();
@@ -699,7 +689,7 @@ NetworkStack_run(void)
         return OS_ERROR_NOT_INITIALIZED;
     }
 
-    network_stack_interface_t network_stack = network_stack_pico_get_config();
+    NetworkStack_Interface_t network_stack = network_stack_pico_get_config();
 
     // enter endless loop processing events
     for (;;)

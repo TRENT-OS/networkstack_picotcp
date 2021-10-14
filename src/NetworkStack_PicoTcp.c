@@ -12,7 +12,8 @@
 #include "lib_macros/Array.h"
 #include "lib_debug/Debug.h"
 
-#include "NetworkStack.h"
+#include "network_stack_core.h"
+#include "network_stack_pico.h"
 
 #include <camkes.h>
 #include <string.h>

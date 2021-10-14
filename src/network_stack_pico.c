@@ -6,12 +6,13 @@
  * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
 
-#include <stddef.h>
-#include <stdlib.h>
-
-#include "NetworkStack.h"
 #include "network/OS_Network_types.h"
-#include "network_config.h"
+#include "lib_compiler/compiler.h"
+#include "lib_debug/Debug.h"
+#include "lib_debug/Debug_OS_Error.h"
+#include "lib_macros/Check.h"
+
+#include "network_stack_config.h"
 #include "network_stack_core.h"
 #include "network_stack_pico.h"
 #include "network_stack_pico_nic.h"
@@ -21,10 +22,8 @@
 #include "pico_socket.h"
 #include "pico_stack.h"
 
-#include "lib_compiler/compiler.h"
-#include "lib_debug/Debug.h"
-#include "lib_debug/Debug_OS_Error.h"
-#include "lib_macros/Check.h"
+#include <stddef.h>
+#include <stdlib.h>
 
 //------------------------------------------------------------------------------
 static OS_Error_t
@@ -141,10 +140,10 @@ pico_err2str(
     return "PICO_ERR_???";
 }
 
-network_stack_interface_t
+NetworkStack_Interface_t
 network_stack_pico_get_config(void)
 {
-    network_stack_interface_t config;
+    NetworkStack_Interface_t config;
 
     config.nic_init   = pico_nic_initialize;
     config.stack_init = pico_stack_init;

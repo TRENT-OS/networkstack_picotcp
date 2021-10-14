@@ -6,15 +6,17 @@
  * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
 
-#include <stddef.h>
-#include <stdlib.h>
-
+#include "OS_Error.h"
 #include "OS_Types.h"
-#include "network_config.h"
+#include "network/OS_Network_types.h"
 #include "network/OS_NetworkStack.h"
+
+#include "network_stack_config.h"
 #include "pico_device.h"
 #include "pico_stack.h"
 
+#include <stddef.h>
+#include <stdlib.h>
 
 // currently we support only one NIC
 static struct pico_device os_nic;
