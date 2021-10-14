@@ -2,7 +2,6 @@
  *  Network Stack Internal Ticker
  *
  *  Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
- *
  */
 
 #include "lib_debug/Debug.h"

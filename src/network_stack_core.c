@@ -1,8 +1,5 @@
 /*
- * OS Network Stack
- *
- * Core functions of the TRENTOS-M Network stack, independent of any
- * actual implementation
+ * Network Stack Core functions
  *
  * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  */

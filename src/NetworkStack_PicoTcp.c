@@ -1,5 +1,5 @@
 /*
- * OS Network Stack CAmkES wrapper
+ * Network Stack CAmkES wrapper
  *
  * Copyright (C) 2021, HENSOLDT Cyber GmbH
  */

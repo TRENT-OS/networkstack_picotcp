@@ -1,5 +1,5 @@
 /*
- * OS Network Stack Config Wrapper
+ * Network Stack Config wrapper
  *
  * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  */
