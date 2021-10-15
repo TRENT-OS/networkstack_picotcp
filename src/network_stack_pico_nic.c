@@ -23,9 +23,9 @@ static struct pico_device os_nic;
 // Called by picoTCP to send one frame
 static int
 nic_send_frame(
-    struct pico_device*  dev,
-    void*                buf,
-    int                  len)
+    struct pico_device* dev,
+    void*               buf,
+    int                 len)
 {
     // currently we support only one NIC
     Debug_ASSERT( &os_nic == dev );
@@ -86,8 +86,8 @@ nic_send_frame(
 // Called after notification from driver and regularly from picoTCP stack tick
 static int
 nic_poll_data(
-    struct pico_device*  dev,
-    int                  loop_score)
+    struct pico_device* dev,
+    int                 loop_score)
 {
     // currently we support only one NIC
     Debug_ASSERT(&os_nic == dev);
