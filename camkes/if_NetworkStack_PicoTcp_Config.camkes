@@ -21,7 +21,7 @@
 procedure if_NetworkStack_PicoTcp_Config {
 
     include "OS_Error.h";
-    include "OS_Network.h";
+    include "OS_Socket.h";
 
     /**
      * Configures the IP stack.

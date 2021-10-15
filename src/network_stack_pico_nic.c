@@ -6,8 +6,9 @@
 
 #include "OS_Error.h"
 #include "OS_Types.h"
-#include "network/OS_Network_types.h"
-#include "network/OS_NetworkStack.h"
+
+#include "network/OS_NetworkStackTypes.h"
+#include "network/OS_SocketTypes.h"
 
 #include "network_stack_config.h"
 #include "pico_device.h"

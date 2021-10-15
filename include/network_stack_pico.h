@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "OS_Network.h"
-#include "network/OS_Network_types.h"
+#include "OS_Socket.h"
+#include "network/OS_SocketTypes.h"
 
 #include "network_stack_core.h"
 
@@ -34,12 +34,12 @@ network_stack_pico_socket_close(
 OS_Error_t
 network_stack_pico_socket_connect(
     const int handle,
-    const OS_NetworkSocket_Addr_t* const dstAddr);
+    const OS_Socket_Addr_t* const dstAddr);
 
 OS_Error_t
 network_stack_pico_socket_bind(
     const int handle,
-    const OS_NetworkSocket_Addr_t* const localAddr);
+    const OS_Socket_Addr_t* const localAddr);
 
 OS_Error_t
 network_stack_pico_socket_listen(
@@ -50,7 +50,7 @@ OS_Error_t
 network_stack_pico_socket_accept(
     const int handle,
     int* const pClient_handle,
-    OS_NetworkSocket_Addr_t* const srcAddr);
+    OS_Socket_Addr_t* const srcAddr);
 
 OS_Error_t
 network_stack_pico_socket_write(
@@ -66,13 +66,13 @@ OS_Error_t
 network_stack_pico_socket_sendto(
     const int handle,
     size_t* const pLen,
-    const OS_NetworkSocket_Addr_t* const dstAddr);
+    const OS_Socket_Addr_t* const dstAddr);
 
 OS_Error_t
 network_stack_pico_socket_recvfrom(
     const int handle,
     size_t* const pLen,
-    OS_NetworkSocket_Addr_t* const srcAddr);
+    OS_Socket_Addr_t* const srcAddr);
 
 #define PICO_TCP_NAGLE_DISABLE 1
 #define PICO_TCP_NAGLE_ENABLE  0

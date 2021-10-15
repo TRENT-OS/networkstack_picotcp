@@ -7,9 +7,10 @@
 #pragma once
 
 #include "OS_Dataport.h"
+#include "OS_Error.h"
 #include "OS_Types.h"
 
-#include "network/OS_Network_types.h"
+#include "network/OS_NetworkStackTypes.h"
 
 #include <stddef.h>
 

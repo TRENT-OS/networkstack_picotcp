@@ -8,7 +8,7 @@
 
 #include "OS_Dataport.h"
 #include "OS_Error.h"
-#include "OS_Network.h"
+#include "OS_Socket.h"
 #include "OS_Types.h"
 
 #include "lib_debug/Debug.h"

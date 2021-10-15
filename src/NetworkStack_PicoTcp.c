@@ -6,7 +6,7 @@
 
 #include "OS_Dataport.h"
 #include "OS_Error.h"
-#include "OS_Network.h"
+#include "OS_Socket.h"
 
 #include "TimeServer.h"
 #include "lib_macros/Array.h"
@@ -15,8 +15,10 @@
 #include "network_stack_core.h"
 #include "network_stack_pico.h"
 
-#include <camkes.h>
+#include <arpa/inet.h>
 #include <string.h>
+
+#include <camkes.h>
 
 // In its current implementation, the component supports a maximum of 8 clients
 // to be connected to it.

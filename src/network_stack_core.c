@@ -4,8 +4,8 @@
  * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  */
 
-#include "network/OS_NetworkStack.h"
-#include "network/OS_Network_types.h"
+#include "network/OS_NetworkStackTypes.h"
+#include "network/OS_SocketTypes.h"
 
 #include "lib_macros/Check.h"
 
@@ -82,8 +82,8 @@ networkStack_rpc_socket_close(
 //------------------------------------------------------------------------------
 OS_Error_t
 networkStack_rpc_socket_connect(
-    const int                            handle,
-    const OS_NetworkSocket_Addr_t* const dstAddr)
+    const int                     handle,
+    const OS_Socket_Addr_t* const dstAddr)
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
@@ -104,8 +104,8 @@ networkStack_rpc_socket_connect(
 //------------------------------------------------------------------------------
 OS_Error_t
 networkStack_rpc_socket_bind(
-    const int                            handle,
-    const OS_NetworkSocket_Addr_t* const localAddr)
+    const int                     handle,
+    const OS_Socket_Addr_t* const localAddr)
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
@@ -146,9 +146,9 @@ networkStack_rpc_socket_listen(
 // as we cannot accept incoming connections
 OS_Error_t
 networkStack_rpc_socket_accept(
-    const int                      handle,
-    int* const                     pClient_handle,
-    OS_NetworkSocket_Addr_t* const srcAddr)
+    const int               handle,
+    int* const              pClient_handle,
+    OS_Socket_Addr_t* const srcAddr)
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
@@ -207,9 +207,9 @@ networkStack_rpc_socket_read(
 //------------------------------------------------------------------------------
 OS_Error_t
 networkStack_rpc_socket_sendto(
-    const int                            handle,
-    size_t* const                        pLen,
-    const OS_NetworkSocket_Addr_t* const dstAddr)
+    const int                     handle,
+    size_t* const                 pLen,
+    const OS_Socket_Addr_t* const dstAddr)
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
@@ -229,9 +229,9 @@ networkStack_rpc_socket_sendto(
 //------------------------------------------------------------------------------
 OS_Error_t
 networkStack_rpc_socket_recvfrom(
-    const int                      handle,
-    size_t* const                  pLen,
-    OS_NetworkSocket_Addr_t* const srcAddr)
+    const int               handle,
+    size_t* const           pLen,
+    OS_Socket_Addr_t* const srcAddr)
 {
     CHECK_IS_RUNNING(networkStack_getState());
 
@@ -264,7 +264,7 @@ networkStack_rpc_socket_getPendingEvents(
 
     CHECK_PTR_NOT_NULL(pNumberOfEvents);
 
-    if (maxRequestedSize < sizeof(OS_NetworkSocket_Evt_t))
+    if (maxRequestedSize < sizeof(OS_Socket_Evt_t))
     {
         Debug_LOG_ERROR("Received invalid buffer size");
         return OS_ERROR_BUFFER_TOO_SMALL;
@@ -285,11 +285,11 @@ networkStack_rpc_socket_getPendingEvents(
 
     if (maxRequestedSize <= clientDataportSize)
     {
-        maxSocketsWithEvents = ((maxRequestedSize) / sizeof(OS_NetworkSocket_Evt_t));
+        maxSocketsWithEvents = ((maxRequestedSize) / sizeof(OS_Socket_Evt_t));
     }
     else
     {
-        maxSocketsWithEvents = ((clientDataportSize) / sizeof(OS_NetworkSocket_Evt_t));
+        maxSocketsWithEvents = ((clientDataportSize) / sizeof(OS_Socket_Evt_t));
     }
 
     int offset = 0;
@@ -304,7 +304,7 @@ networkStack_rpc_socket_getPendingEvents(
             if (instance.sockets[i].eventMask)
             {
                 socketsWithEvents++;
-                OS_NetworkSocket_Evt_t event;
+                OS_Socket_Evt_t event;
 
                 internal_network_stack_thread_safety_mutex_lock();
                 event.eventMask = instance.sockets[i].eventMask;

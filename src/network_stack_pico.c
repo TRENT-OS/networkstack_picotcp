@@ -4,7 +4,8 @@
  * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
 
-#include "network/OS_Network_types.h"
+#include "network/OS_SocketTypes.h"
+#include "network/OS_NetworkTypes.h"
 #include "lib_compiler/compiler.h"
 #include "lib_debug/Debug.h"
 #include "lib_debug/Debug_OS_Error.h"
@@ -495,8 +496,8 @@ network_stack_pico_socket_close(
 //------------------------------------------------------------------------------
 OS_Error_t
 network_stack_pico_socket_connect(
-    const int                            handle,
-    const OS_NetworkSocket_Addr_t* const dstAddr)
+    const int                     handle,
+    const OS_Socket_Addr_t* const dstAddr)
 {
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
@@ -541,8 +542,8 @@ network_stack_pico_socket_connect(
 //------------------------------------------------------------------------------
 OS_Error_t
 network_stack_pico_socket_bind(
-    const int                            handle,
-    const OS_NetworkSocket_Addr_t* const localAddr)
+    const int                     handle,
+    const OS_Socket_Addr_t* const localAddr)
 {
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
@@ -623,9 +624,9 @@ network_stack_pico_socket_listen(
 //------------------------------------------------------------------------------
 OS_Error_t
 network_stack_pico_socket_accept(
-    const int                      handle,
-    int* const                     pClient_handle,
-    OS_NetworkSocket_Addr_t* const srcAddr)
+    const int               handle,
+    int* const              pClient_handle,
+    OS_Socket_Addr_t* const srcAddr)
 {
     uint16_t        port = 0;
     struct pico_ip4 orig = { 0 };
@@ -874,9 +875,9 @@ network_stack_pico_socket_read(
 //------------------------------------------------------------------------------
 OS_Error_t
 network_stack_pico_socket_sendto(
-    const int                            handle,
-    size_t* const                        pLen,
-    const OS_NetworkSocket_Addr_t* const dstAddr)
+    const int                     handle,
+    size_t* const                 pLen,
+    const OS_Socket_Addr_t* const dstAddr)
 {
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
@@ -933,9 +934,9 @@ network_stack_pico_socket_sendto(
 //------------------------------------------------------------------------------
 OS_Error_t
 network_stack_pico_socket_recvfrom(
-    const int                      handle,
-    size_t* const                  pLen,
-    OS_NetworkSocket_Addr_t* const srcAddr)
+    const int               handle,
+    size_t* const           pLen,
+    OS_Socket_Addr_t* const srcAddr)
 {
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
