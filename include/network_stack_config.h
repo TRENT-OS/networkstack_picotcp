@@ -49,8 +49,10 @@ typedef struct
     volatile uint16_t eventMask;
     volatile OS_Error_t current_error;
     volatile int pendingConnections;
+    volatile int connected;
 
     int clientId;
+    int socketType;
 
     void* buf_io;
     OS_Dataport_t buf;

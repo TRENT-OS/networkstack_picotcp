@@ -91,6 +91,8 @@ networkStack_rpc_socket_connect(
 
     CHECK_SOCKET(socket, handle);
 
+    CHECK_SOCKET_TYPE(socket, OS_SOCK_STREAM);
+
     CHECK_CLIENT_ID(socket);
 
     CHECK_PTR_NOT_NULL(dstAddr);
@@ -135,6 +137,8 @@ networkStack_rpc_socket_listen(
 
     CHECK_SOCKET(socket, handle);
 
+    CHECK_SOCKET_TYPE(socket, OS_SOCK_STREAM);
+
     CHECK_CLIENT_ID(socket);
 
     return network_stack_pico_socket_listen(handle, backlog);
@@ -155,6 +159,8 @@ networkStack_rpc_socket_accept(
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
+
+    CHECK_SOCKET_TYPE(socket, OS_SOCK_STREAM);
 
     CHECK_CLIENT_ID(socket);
 
@@ -178,6 +184,10 @@ networkStack_rpc_socket_write(
 
     CHECK_SOCKET(socket, handle);
 
+    CHECK_SOCKET_TYPE(socket, OS_SOCK_STREAM);
+
+    CHECK_SOCKET_CONNECTED(socket);
+
     CHECK_CLIENT_ID(socket);
 
     CHECK_PTR_NOT_NULL(pLen);
@@ -196,6 +206,10 @@ networkStack_rpc_socket_read(
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
+
+    CHECK_SOCKET_TYPE(socket, OS_SOCK_STREAM);
+
+    CHECK_SOCKET_CONNECTED(socket);
 
     CHECK_CLIENT_ID(socket);
 
@@ -216,6 +230,8 @@ networkStack_rpc_socket_sendto(
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
+
+    CHECK_SOCKET_TYPE(socket, OS_SOCK_DGRAM);
 
     CHECK_CLIENT_ID(socket);
 
@@ -238,6 +254,8 @@ networkStack_rpc_socket_recvfrom(
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     CHECK_SOCKET(socket, handle);
+
+    CHECK_SOCKET_TYPE(socket, OS_SOCK_DGRAM);
 
     CHECK_CLIENT_ID(socket);
 
@@ -488,6 +506,8 @@ reserve_handle(
             instance.sockets[i].current_error = OS_SUCCESS;
             instance.sockets[i].clientId = clientId;
             instance.sockets[i].pendingConnections = 0;
+            instance.sockets[i].socketType = 0;
+            instance.sockets[i].connected = false;
             handle = i;
             break;
         }
@@ -550,6 +570,8 @@ free_handle(
     instance.sockets[handle].pendingConnections = 0;
     instance.sockets[handle].eventMask = 0;
     instance.sockets[handle].current_error = 0;
+    instance.sockets[handle].socketType = 0;
+    instance.sockets[handle].connected = false;
     internal_socket_control_block_mutex_unlock();
 
     Debug_LOG_DEBUG("Freed socket handle %d", handle);

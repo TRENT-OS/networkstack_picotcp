@@ -27,6 +27,26 @@
         }                                                                      \
     } while (0)
 
+#define CHECK_SOCKET_TYPE(_socket_, _type_)                                    \
+    do                                                                         \
+    {                                                                          \
+        if (_socket_->socketType != _type_)                                    \
+        {                                                                      \
+            Debug_LOG_ERROR("%s: invalid socket type %d", __func__, _type_);   \
+            return OS_ERROR_NETWORK_PROTO;                                     \
+        }                                                                      \
+    } while (0)
+
+#define CHECK_SOCKET_CONNECTED(_socket_)                                       \
+    do                                                                         \
+    {                                                                          \
+        if (!_socket_->connected)                                              \
+        {                                                                      \
+            Debug_LOG_ERROR("%s: socket not connected", __func__);             \
+            return OS_ERROR_NETWORK_CONN_NONE;                                 \
+        }                                                                      \
+    } while (0)
+
 #define CHECK_CLIENT_ID(_socket_)                                              \
     do                                                                         \
     {                                                                          \

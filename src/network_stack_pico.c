@@ -286,6 +286,7 @@ handle_pico_socket_event(
                            pico_socket,
                            srcAddr);
             socket->eventMask |= OS_SOCK_EV_CONN_EST;
+            socket->connected = true;
         }
     }
 
@@ -416,6 +417,8 @@ network_stack_pico_socket_create(
     }
 
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
+
+    socket->socketType = socket_type;
 
     socket->buf_io    = buffer;
     OS_Dataport_t tmp = OS_DATAPORT_ASSIGN_SIZE(socket->buf_io, buffer_size);
