@@ -6,7 +6,7 @@
 
 cmake_minimum_required(VERSION 3.18)
 
-project(networkStack_PicoTcp C)
+project(networkStack_PicoTcp_api C)
 
 add_library(${PROJECT_NAME} INTERFACE)
 
