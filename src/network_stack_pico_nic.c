@@ -5,7 +5,7 @@
  */
 
 #include "OS_Error.h"
-#include "OS_Types.h"
+#include "OS_Dataport.h"
 
 #include "network/OS_NetworkStackTypes.h"
 #include "network/OS_SocketTypes.h"
