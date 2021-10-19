@@ -622,7 +622,7 @@ notify_clients_about_pending_events(
             {
                 if (NULL != instance.clients[i].eventNotify)
                 {
-                    Debug_LOG_ERROR("Notify client %d, clientId: %d", i,
+                    Debug_LOG_TRACE("Notify client %d, clientId: %d", i,
                                     instance.clients[i].clientId);
                     instance.clients[i].eventNotify();
                 }
