@@ -403,6 +403,8 @@ network_stack_pico_socket_create(
         }
         internal_network_stack_thread_safety_mutex_unlock();
 
+        internal_notify_main_loop();
+
         if (PICO_ERR_NOERR != cur_pico_err)
         {
             Debug_LOG_ERROR("socket closing failed, pico_err = %d (%s)",
@@ -471,6 +473,8 @@ network_stack_pico_socket_close(
         socket->eventMask     &= ~(OS_SOCK_EV_CLOSE);
         internal_network_stack_thread_safety_mutex_unlock();
 
+        internal_notify_main_loop();
+
         if (ret < 0)
         {
             Debug_LOG_ERROR("[socket %d/%p] nw_socket_close() failed with error %d, translating to OS error %d (%s)",
@@ -529,6 +533,8 @@ network_stack_pico_socket_connect(
         return err;
     }
 
+    internal_notify_main_loop();
+
     return OS_SUCCESS;
 }
 
@@ -574,6 +580,8 @@ network_stack_pico_socket_bind(
         return err;
     }
 
+    internal_notify_main_loop();
+
     return OS_SUCCESS;
 }
 
@@ -606,6 +614,8 @@ network_stack_pico_socket_listen(
                         err, Debug_OS_Error_toString(err));
         return err;
     }
+
+    internal_notify_main_loop();
 
     return OS_SUCCESS;
 }
@@ -656,6 +666,7 @@ network_stack_pico_socket_accept(
                 err,
                 Debug_OS_Error_toString(err));
         }
+        internal_notify_main_loop();
         internal_network_stack_thread_safety_mutex_unlock();
         return err;
     }
@@ -769,6 +780,8 @@ network_stack_pico_socket_write(
 
     *pLen = ret;
 
+    internal_notify_main_loop();
+
     return OS_SUCCESS;
 }
 
@@ -829,6 +842,8 @@ network_stack_pico_socket_read(
     {
         socket->eventMask &= ~OS_SOCK_EV_READ;
         *pLen = ret;
+
+        internal_notify_main_loop();
 
         return OS_ERROR_TRY_AGAIN;
     }
@@ -910,6 +925,8 @@ network_stack_pico_socket_sendto(
 
     *pLen = ret;
 
+    internal_notify_main_loop();
+
     return OS_SUCCESS;
 }
 
@@ -969,6 +986,8 @@ network_stack_pico_socket_recvfrom(
         {
             socket->eventMask &= ~OS_SOCK_EV_READ;
             *pLen = ret;
+
+            internal_notify_main_loop();
 
             return OS_ERROR_TRY_AGAIN;
         }
