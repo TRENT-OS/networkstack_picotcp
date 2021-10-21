@@ -186,7 +186,7 @@ networkStack_rpc_socket_write(
 
     CHECK_SOCKET_TYPE(socket, OS_SOCK_STREAM);
 
-    CHECK_SOCKET_CONNECTED(socket);
+    CHECK_SOCKET_CONNECTED(socket, handle);
 
     CHECK_CLIENT_ID(socket);
 
@@ -209,7 +209,7 @@ networkStack_rpc_socket_read(
 
     CHECK_SOCKET_TYPE(socket, OS_SOCK_STREAM);
 
-    CHECK_SOCKET_CONNECTED(socket);
+    CHECK_SOCKET_CONNECTED(socket, handle);
 
     CHECK_CLIENT_ID(socket);
 

@@ -41,12 +41,14 @@
         }                                                                      \
     } while (0)
 
-#define CHECK_SOCKET_CONNECTED(_socket_)                                       \
+#define CHECK_SOCKET_CONNECTED(_socket_, _handle_)                             \
     do                                                                         \
     {                                                                          \
         if (!_socket_->connected)                                              \
         {                                                                      \
-            Debug_LOG_ERROR("%s: socket not connected", __func__);             \
+            Debug_LOG_ERROR("%s: socket %d not connected",                     \
+             __func__,                                                         \
+             _handle_);                                                        \
             return OS_ERROR_NETWORK_CONN_NONE;                                 \
         }                                                                      \
     } while (0)
