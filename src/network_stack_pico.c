@@ -736,6 +736,9 @@ network_stack_pico_socket_accept(
 
     CHECK_CLIENT_ID(socket_client);
 
+    socket_client->socketType = OS_SOCK_STREAM;
+    socket_client->connected  = true;
+
     socket_client->buf_io = socket->buf_io;
     socket_client->buf    = socket->buf;
     internal_network_stack_thread_safety_mutex_unlock();
