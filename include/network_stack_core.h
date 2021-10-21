@@ -32,7 +32,11 @@
     {                                                                          \
         if (_socket_->socketType != _type_)                                    \
         {                                                                      \
-            Debug_LOG_ERROR("%s: invalid socket type %d", __func__, _type_);   \
+            Debug_LOG_ERROR(                                                   \
+                "%s: invalid socket type %d, expected %d",                     \
+                __func__,                                                      \
+                _socket_->socketType,                                          \
+                _type_);                                                       \
             return OS_ERROR_NETWORK_PROTO;                                     \
         }                                                                      \
     } while (0)
