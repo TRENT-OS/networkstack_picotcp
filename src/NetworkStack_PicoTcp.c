@@ -188,7 +188,7 @@ initializeNetworkStack(void)
     if (ARRAY_ELEMENTS(networkStack_config.clients) < numberConnectedClients)
     {
         Debug_LOG_ERROR(
-            "[NwStack '%s'] Configuration found for %d clients, but %d clients"
+            "[NwStack '%s'] Configuration found for %zu clients, but %d clients"
             " are connected",
             get_instance_name(),
             ARRAY_ELEMENTS(networkStack_config.clients),
@@ -215,7 +215,7 @@ initializeNetworkStack(void)
     for (int i = 0; i < numberConnectedClients; i++)
     {
         Debug_LOG_DEBUG(
-            "[NwStack '%s'] clientId (%d): %d, Min: %d, Max: %d",
+            "[NwStack '%s'] clientId (%d): %"SEL4_PRI_word", Min: %d, Max: %d",
             get_instance_name(),
             i,
             networkStack_rpc_enumerate_badge(i),
@@ -226,7 +226,7 @@ initializeNetworkStack(void)
             (networkStack_rpc_enumerate_badge(i) >= MIN_BADGE_ID + numberConnectedClients))
         {
             Debug_LOG_ERROR(
-                "[NwStack '%s'] Badge Id is out of bounds: %d, Min: %d, Max: %d",
+                "[NwStack '%s'] Badge Id is out of bounds: %"SEL4_PRI_word", Min: %d, Max: %d",
                 get_instance_name(),
                 networkStack_rpc_enumerate_badge(i),
                 MIN_BADGE_ID,
@@ -289,7 +289,7 @@ initializeNetworkStack(void)
 
     for (int i = 0; i < numberConnectedClients; i++)
     {
-        Debug_LOG_DEBUG("Client[%d] badge #%d",
+        Debug_LOG_DEBUG("Client[%d] badge #%"SEL4_PRI_word"",
                         i, networkStack_rpc_enumerate_badge(i));
     }
 
