@@ -192,6 +192,13 @@ networkStack_rpc_socket_write(
 
     CHECK_PTR_NOT_NULL(pLen);
 
+    // If the requested length exceeds the dataport size, reduce it to the size
+    // of the dataport.
+    if (*pLen > get_client_id_buf_size())
+    {
+        *pLen = get_client_id_buf_size();
+    }
+
     return network_stack_pico_socket_write(handle, pLen);
 }
 
@@ -214,6 +221,13 @@ networkStack_rpc_socket_read(
     CHECK_CLIENT_ID(socket);
 
     CHECK_PTR_NOT_NULL(pLen);
+
+    // If the requested length exceeds the dataport size, reduce it to the size
+    // of the dataport.
+    if (*pLen > get_client_id_buf_size())
+    {
+        *pLen = get_client_id_buf_size();
+    }
 
     return network_stack_pico_socket_read(handle, pLen);
 }
@@ -239,6 +253,13 @@ networkStack_rpc_socket_sendto(
 
     CHECK_PTR_NOT_NULL(dstAddr);
 
+    // If the requested length exceeds the dataport size, reduce it to the size
+    // of the dataport.
+    if (*pLen > get_client_id_buf_size())
+    {
+        *pLen = get_client_id_buf_size();
+    }
+
     return network_stack_pico_socket_sendto(handle, pLen, dstAddr);
 }
 
@@ -260,6 +281,13 @@ networkStack_rpc_socket_recvfrom(
     CHECK_CLIENT_ID(socket);
 
     CHECK_PTR_NOT_NULL(pLen);
+
+    // If the requested length exceeds the dataport size, reduce it to the size
+    // of the dataport.
+    if (*pLen > get_client_id_buf_size())
+    {
+        *pLen = get_client_id_buf_size();
+    }
 
     return network_stack_pico_socket_recvfrom(handle, pLen, srcAddr);
 }
