@@ -282,6 +282,8 @@ networkStack_rpc_socket_recvfrom(
 
     CHECK_PTR_NOT_NULL(pLen);
 
+    CHECK_PTR_NOT_NULL(srcAddr);
+
     // If the requested length exceeds the dataport size, reduce it to the size
     // of the dataport.
     if (*pLen > get_client_id_buf_size())
