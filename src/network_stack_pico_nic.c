@@ -137,7 +137,7 @@ nic_poll_data(
                 }
                 if (status == OS_ERROR_NO_DATA)
                 {
-                    Debug_LOG_DEBUG("No data to be read");
+                    Debug_LOG_TRACE("No data to be read");
                     break;
                 }
             }
