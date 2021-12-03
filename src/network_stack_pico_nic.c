@@ -17,6 +17,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#define COPY_CYCLES 4
+
 // currently we support only one NIC
 static struct pico_device os_nic;
 
@@ -39,8 +41,25 @@ nic_send_frame(
         return -1;
     }
 
+    //perform the specififed amount of copy operations
+    if (COPY_CYCLES) {
+        int i = COPY_CYCLES-1;
+        char copy_buf1[4096];
+        char copy_buf2[4096];
+        memcpy(copy_buf1, buf, 4096);
+        for ( i = COPY_CYCLES-1; i > 1; (i = i-2))
+        {
+            memcpy(copy_buf2, copy_buf1, 4096);
+            memcpy(copy_buf1, copy_buf2, 4096);
+        }
+        if (i) 
+        {
+            memcpy(copy_buf2, copy_buf1, 4096);
+        }
+    }
+
     // copy data into shared buffer and call driver
-    memcpy(wrbuf, buf, len);
+    memcpy(wrbuf, buf, len); /// here we could add useless memcpy
     size_t wr_len = len;
     OS_Error_t err = nic_dev_write(&wr_len);
 
@@ -104,7 +123,7 @@ nic_poll_data(
     {
         size_t len;
         size_t framesRemaining = 1;
-
+        
         while (loop_score > 0 && framesRemaining)
         {
             OS_Error_t status = nic_dev_read(&len, &framesRemaining);
@@ -146,6 +165,23 @@ nic_poll_data(
             pico_stack_recv(dev, (void*)buf_ptr, len);
             loop_score--;
             isDetectionDone = true;
+
+            //perform the specififed amount of copy operations
+            if (COPY_CYCLES) 
+            {
+                int i = COPY_CYCLES-1;
+                char copy_buf1[4096];
+                char copy_buf2[4096];
+                memcpy(copy_buf1, buf_ptr, 4096);
+                for ( i = COPY_CYCLES-1; i > 1; (i = i-2))
+                {
+                    memcpy(copy_buf2, copy_buf1, 4096);
+                    memcpy(copy_buf1, copy_buf2, 4096);
+                }
+                if (i) {
+                    memcpy(copy_buf2, copy_buf1, 4096);
+                }
+            }
         }
 
         if (loop_score == 0 && framesRemaining)
