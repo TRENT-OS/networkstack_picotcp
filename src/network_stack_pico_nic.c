@@ -17,7 +17,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#define COPY_CYCLES 4
+#define COPY_CYCLES 2
 
 // currently we support only one NIC
 static struct pico_device os_nic;
@@ -40,12 +40,17 @@ nic_send_frame(
         Debug_LOG_ERROR("Buffer doesn't fit in dataport");
         return -1;
     }
-
+    char * buf_ptr = buf;
     //perform the specififed amount of copy operations
+    //#pragma GCC push_options
+    //#pragma GCC optimize ("O0") 
+    char copy_buf1[4096];
+        
     if (COPY_CYCLES) {
-        int i = COPY_CYCLES-1;
-        char copy_buf1[4096];
         char copy_buf2[4096];
+
+        int i = COPY_CYCLES-1;
+        buf_ptr = copy_buf1;
         memcpy(copy_buf1, buf, 4096);
         for ( i = COPY_CYCLES-1; i > 1; (i = i-2))
         {
@@ -59,7 +64,7 @@ nic_send_frame(
     }
 
     // copy data into shared buffer and call driver
-    memcpy(wrbuf, buf, len); /// here we could add useless memcpy
+    memcpy(wrbuf, buf_ptr, len); /// here we could add useless memcpy
     size_t wr_len = len;
     OS_Error_t err = nic_dev_write(&wr_len);
 
@@ -182,6 +187,7 @@ nic_poll_data(
                     memcpy(copy_buf2, copy_buf1, 4096);
                 }
             }
+            //sync();
         }
 
         if (loop_score == 0 && framesRemaining)
