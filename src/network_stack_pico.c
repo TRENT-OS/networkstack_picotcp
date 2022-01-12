@@ -320,24 +320,36 @@ handle_pico_socket_event(
 
     if (event_mask & PICO_SOCK_EV_ERR)
     {
-        OS_Error_t err        = pico_err2os(pico_err);
-        socket->current_error = err;
-        Debug_LOG_ERROR("[socket %d/%p] PICO_SOCK_EV_ERR, OS error = %d (%s)",
-                        handle,
-                        pico_socket,
-                        err,
-                        Debug_OS_Error_toString(err));
-        socket->eventMask |= OS_SOCK_EV_ERROR;
-
-        // If err = PICO_ERR_ECONNREFUSED is set by picoTCP, the
-        // implementation_socket will be freed automatically and may not be
-        // accessed any more;
-        // Workaround: set OS_SOCK_EV_FIN.
-        if (pico_err == PICO_ERR_ECONNREFUSED)
+        // If the current error is set to PICO_ERR_ECONNREFUSED by picoTCP for a
+        // UDP socket, do not forward this. This is not an error condition in
+        // the context of UDP.
+        if ((pico_err == PICO_ERR_ECONNREFUSED)
+            && (socket->socketType == OS_SOCK_DGRAM))
         {
             Debug_LOG_DEBUG("[socket %d/%p] PICO_SOCK_EV_ERR & PICO_ERR_ECONNREFUSED",
                             handle, pico_socket);
-            socket->eventMask |= OS_SOCK_EV_FIN;
+        }
+        else
+        {
+            OS_Error_t err = pico_err2os(pico_err);
+            socket->current_error = err;
+            Debug_LOG_ERROR("[socket %d/%p] PICO_SOCK_EV_ERR, OS error = %d (%s)",
+                            handle,
+                            pico_socket,
+                            err,
+                            Debug_OS_Error_toString(err));
+            socket->eventMask |= OS_SOCK_EV_ERROR;
+
+            // If err = PICO_ERR_ECONNREFUSED is set by picoTCP, the
+            // implementation_socket will be freed automatically and may not be
+            // accessed any more;
+            // Workaround: set OS_SOCK_EV_FIN.
+            if (pico_err == PICO_ERR_ECONNREFUSED)
+            {
+                Debug_LOG_DEBUG("[socket %d/%p] PICO_SOCK_EV_ERR & PICO_ERR_ECONNREFUSED",
+                                handle, pico_socket);
+                socket->eventMask |= OS_SOCK_EV_FIN;
+            }
         }
     }
 
