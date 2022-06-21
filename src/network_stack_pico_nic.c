@@ -198,6 +198,8 @@ nic_destroy(
 OS_Error_t
 pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
 {
+    int ret;
+
     // currently we support only one NIC
     struct pico_device* dev = &os_nic;
 
@@ -226,7 +228,7 @@ pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
                    mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );
 
     static const char* drv_name  = "trentos_nic_driver";
-    int ret = pico_device_init(dev, drv_name, mac);
+    ret = pico_device_init(dev, drv_name, mac);
     if (ret != 0)
     {
         Debug_LOG_ERROR("pico_device_init() failed, error %d", ret);
@@ -242,27 +244,60 @@ pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
     // directly
 
     uint32_t ip_addr;
-    pico_string_to_ipv4(config->dev_addr, &ip_addr);
+    ret = pico_string_to_ipv4(config->dev_addr, &ip_addr);
+    if (ret != 0)
+    {
+        Debug_LOG_ERROR("pico_string_to_ipv4() failed translating IP address '%s', error %d",
+                        config->dev_addr, ret);
+        nic_destroy(dev);
+        return OS_ERROR_GENERIC;
+    }
 
     uint32_t netmask_addr;
-    pico_string_to_ipv4(config->subnet_mask, &netmask_addr);
+    ret = pico_string_to_ipv4(config->subnet_mask, &netmask_addr);
+    if (ret != 0)
+    {
+        Debug_LOG_ERROR("pico_string_to_ipv4() failed translating netmask '%s', error %d",
+                        config->subnet_mask, ret);
+        nic_destroy(dev);
+        return OS_ERROR_GENERIC;
+    }
 
     uint32_t gateway_addr;
-    pico_string_to_ipv4(config->gateway_addr, &gateway_addr);
+    ret = pico_string_to_ipv4(config->gateway_addr, &gateway_addr);
+    if (ret != 0)
+    {
+        Debug_LOG_ERROR("pico_string_to_ipv4() failed translating gateway address '%s', error %d",
+                        config->gateway_addr, ret);
+        nic_destroy(dev);
+        return OS_ERROR_GENERIC;
+    }
 
     // assign IP address and netmask
-    pico_ipv4_link_add(
+    ret = pico_ipv4_link_add(
             dev,
             (struct pico_ip4){ .addr = ip_addr },
             (struct pico_ip4){ .addr = netmask_addr });
+    if (ret != 0)
+    {
+        Debug_LOG_ERROR("pico_ipv4_link_add() failed, error %d", ret);
+        nic_destroy(dev);
+        return OS_ERROR_GENERIC;
+    }
 
     // add default route via gateway
-    (void)pico_ipv4_route_add(
+    ret = pico_ipv4_route_add(
             (struct pico_ip4){ .addr = 0 }, /* any address */
             (struct pico_ip4){ .addr = 0 }, /* no netmask */
             (struct pico_ip4){ .addr = gateway_addr },
             1,
             NULL);
+    if (ret != 0)
+    {
+        Debug_LOG_ERROR("pico_ipv4_route_add() failed, error %d", ret);
+        nic_destroy(dev);
+        return OS_ERROR_GENERIC;
+    }
 
     return OS_SUCCESS;
 }

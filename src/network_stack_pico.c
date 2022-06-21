@@ -502,6 +502,7 @@ network_stack_pico_socket_connect(
     const int                     handle,
     const OS_Socket_Addr_t* const dstAddr)
 {
+    int ret;
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
@@ -517,17 +518,18 @@ network_stack_pico_socket_connect(
                     handle, pico_socket, dstAddr->addr, dstAddr->port);
 
     uint32_t dst_addr;
-    if (pico_string_to_ipv4((char*)dstAddr->addr, &dst_addr) < 0)
+    ret = pico_string_to_ipv4((char*)dstAddr->addr, &dst_addr);
+    if (ret < 0)
     {
         Debug_LOG_ERROR("[socket %d/%p] pico_string_to_ipv4() failed translating name '%s'",
                         handle, pico_socket, dstAddr->addr);
         return OS_ERROR_INVALID_PARAMETER;
     }
     internal_network_stack_thread_safety_mutex_lock();
-    int ret = pico_socket_connect(
-                pico_socket,
-                &((struct pico_ip4){ .addr = dst_addr }),
-                short_be(dstAddr->port));
+    ret = pico_socket_connect(
+            pico_socket,
+            &((struct pico_ip4){ .addr = dst_addr }),
+            short_be(dstAddr->port));
     OS_Error_t err =  pico_err2os(pico_err);
     socket->current_error = err;
     internal_network_stack_thread_safety_mutex_unlock();
@@ -550,6 +552,7 @@ network_stack_pico_socket_bind(
     const int                     handle,
     const OS_Socket_Addr_t* const localAddr)
 {
+    int ret;
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
@@ -565,7 +568,8 @@ network_stack_pico_socket_bind(
                    localAddr->port);
 
     uint32_t local_addr;
-    if (pico_string_to_ipv4((char*)localAddr->addr, &local_addr) < 0)
+    ret = pico_string_to_ipv4((char*)localAddr->addr, &local_addr);
+    if (ret < 0)
     {
         Debug_LOG_ERROR("[socket %d/%p] pico_string_to_ipv4() failed translating name '%s'",
                         handle, pico_socket, localAddr->addr);
@@ -574,10 +578,10 @@ network_stack_pico_socket_bind(
 
     uint16_t be_port = short_be(localAddr->port);
     internal_network_stack_thread_safety_mutex_lock();
-    int ret = pico_socket_bind(
-                pico_socket,
-                &((struct pico_ip4){ .addr = local_addr }),
-                &be_port);
+    ret = pico_socket_bind(
+            pico_socket,
+            &((struct pico_ip4){ .addr = local_addr }),
+            &be_port);
     OS_Error_t err = pico_err2os(pico_err);
     socket->current_error = err;
     internal_network_stack_thread_safety_mutex_unlock();
@@ -890,6 +894,7 @@ network_stack_pico_socket_sendto(
     size_t* const                 pLen,
     const OS_Socket_Addr_t* const dstAddr)
 {
+    int ret;
     NetworkStack_SocketResources_t* socket = get_socket_from_handle(handle);
 
     if (socket->eventMask & OS_SOCK_EV_FIN)
@@ -907,14 +912,21 @@ network_stack_pico_socket_sendto(
     CHECK_DATAPORT_SIZE(socket->buf, len);
 
     uint32_t dst_addr;
-    pico_string_to_ipv4((char*)dstAddr->addr, &dst_addr);
+    ret = pico_string_to_ipv4((char*)dstAddr->addr, &dst_addr);
+    if (ret < 0)
+    {
+        Debug_LOG_ERROR("[socket %d/%p] pico_string_to_ipv4() failed translating name '%s'",
+                        handle, pico_socket, dstAddr->addr);
+        return OS_ERROR_INVALID_PARAMETER;
+    }
 
     internal_network_stack_thread_safety_mutex_lock();
-    int ret = pico_socket_sendto(pico_socket,
-                                 buf,
-                                 len,
-                                 &((struct pico_ip4){ .addr = dst_addr }),
-                                 short_be(dstAddr->port));
+    ret = pico_socket_sendto(
+            pico_socket,
+            buf,
+            len,
+            &((struct pico_ip4){ .addr = dst_addr }),
+            short_be(dstAddr->port));
     OS_Error_t err = pico_err2os(pico_err);
     socket->current_error = err;
     internal_network_stack_thread_safety_mutex_unlock();
