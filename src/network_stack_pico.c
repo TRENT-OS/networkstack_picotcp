@@ -523,9 +523,11 @@ network_stack_pico_socket_connect(
                         handle, pico_socket, dstAddr->addr);
         return OS_ERROR_INVALID_PARAMETER;
     }
-    struct pico_ip4 dst = { .addr = dst_addr };
     internal_network_stack_thread_safety_mutex_lock();
-    int ret = pico_socket_connect(pico_socket, &dst, short_be(dstAddr->port));
+    int ret = pico_socket_connect(
+                pico_socket,
+                &((struct pico_ip4){ .addr = dst_addr }),
+                short_be(dstAddr->port));
     OS_Error_t err =  pico_err2os(pico_err);
     socket->current_error = err;
     internal_network_stack_thread_safety_mutex_unlock();
@@ -569,10 +571,13 @@ network_stack_pico_socket_bind(
                         handle, pico_socket, localAddr->addr);
         return OS_ERROR_INVALID_PARAMETER;
     }
-    struct pico_ip4 convertedAddr = { .addr = local_addr };
+
     uint16_t be_port = short_be(localAddr->port);
     internal_network_stack_thread_safety_mutex_lock();
-    int ret = pico_socket_bind(pico_socket, &convertedAddr, &be_port);
+    int ret = pico_socket_bind(
+                pico_socket,
+                &((struct pico_ip4){ .addr = local_addr }),
+                &be_port);
     OS_Error_t err = pico_err2os(pico_err);
     socket->current_error = err;
     internal_network_stack_thread_safety_mutex_unlock();
@@ -903,15 +908,13 @@ network_stack_pico_socket_sendto(
 
     uint32_t dst_addr;
     pico_string_to_ipv4((char*)dstAddr->addr, &dst_addr);
-    struct pico_ip4 dst = { .addr = dst_addr };
-    uint16_t dport = short_be(dstAddr->port);
 
     internal_network_stack_thread_safety_mutex_lock();
     int ret = pico_socket_sendto(pico_socket,
                                  buf,
                                  len,
-                                 &dst,
-                                 dport);
+                                 &((struct pico_ip4){ .addr = dst_addr }),
+                                 short_be(dstAddr->port));
     OS_Error_t err = pico_err2os(pico_err);
     socket->current_error = err;
     internal_network_stack_thread_safety_mutex_unlock();

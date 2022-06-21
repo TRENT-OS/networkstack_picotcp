@@ -241,24 +241,28 @@ pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
     // packed, so we cannot have pico_string_to_ipv4() write the fields
     // directly
 
-    uint32_t addr;
+    uint32_t ip_addr;
+    pico_string_to_ipv4(config->dev_addr, &ip_addr);
 
-    pico_string_to_ipv4(config->dev_addr, &addr);
-    struct pico_ip4 ipaddr = { .addr = addr };
+    uint32_t netmask_addr;
+    pico_string_to_ipv4(config->subnet_mask, &netmask_addr);
 
-    pico_string_to_ipv4(config->subnet_mask, &addr);
-    struct pico_ip4 netmask = { .addr = addr };
+    uint32_t gateway_addr;
+    pico_string_to_ipv4(config->gateway_addr, &gateway_addr);
 
     // assign IP address and netmask
-    pico_ipv4_link_add(dev, ipaddr, netmask);
-
-
-    pico_string_to_ipv4(config->gateway_addr, &addr);
-    struct pico_ip4 gateway = { .addr = addr };
+    pico_ipv4_link_add(
+            dev,
+            (struct pico_ip4){ .addr = ip_addr },
+            (struct pico_ip4){ .addr = netmask_addr });
 
     // add default route via gateway
-    const struct pico_ip4 ZERO_IP4 = { 0 };
-    (void)pico_ipv4_route_add(ZERO_IP4, ZERO_IP4, gateway, 1, NULL);
+    (void)pico_ipv4_route_add(
+            (struct pico_ip4){ .addr = 0 }, /* any address */
+            (struct pico_ip4){ .addr = 0 }, /* no netmask */
+            (struct pico_ip4){ .addr = gateway_addr },
+            1,
+            NULL);
 
     return OS_SUCCESS;
 }
