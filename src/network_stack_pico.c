@@ -902,9 +902,8 @@ network_stack_pico_socket_sendto(
     CHECK_DATAPORT_SIZE(socket->buf, len);
 
     struct pico_ip4 dst = {};
-    uint16_t        dport;
     pico_string_to_ipv4((char*)dstAddr->addr, &dst.addr);
-    dport = short_be(dstAddr->port);
+    uint16_t dport = short_be(dstAddr->port);
 
     internal_network_stack_thread_safety_mutex_lock();
     int ret = pico_socket_sendto(pico_socket,
