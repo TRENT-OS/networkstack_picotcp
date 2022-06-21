@@ -237,20 +237,24 @@ pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
     Debug_LOG_INFO("picoTCP Device created: %s", drv_name);
 
     //---------------------------------------------------------------
-    // assign IPv4 configuration
+    // Assign IPv4 configuration. Unfortunately, the structures are declared
+    // packed, so we cannot have pico_string_to_ipv4() write the fields
+    // directly
 
-    struct pico_ip4 ipaddr;
-    pico_string_to_ipv4(config->dev_addr, &ipaddr.addr);
+    uint32_t addr;
 
-    struct pico_ip4 netmask;
-    pico_string_to_ipv4(config->subnet_mask, &netmask.addr);
+    pico_string_to_ipv4(config->dev_addr, &addr);
+    struct pico_ip4 ipaddr = { .addr = addr };
+
+    pico_string_to_ipv4(config->subnet_mask, &addr);
+    struct pico_ip4 netmask = { .addr = addr };
 
     // assign IP address and netmask
     pico_ipv4_link_add(dev, ipaddr, netmask);
 
 
-    struct pico_ip4 gateway;
-    pico_string_to_ipv4(config->gateway_addr, &gateway.addr);
+    pico_string_to_ipv4(config->gateway_addr, &addr);
+    struct pico_ip4 gateway = { .addr = addr };
 
     // add default route via gateway
     const struct pico_ip4 ZERO_IP4 = { 0 };

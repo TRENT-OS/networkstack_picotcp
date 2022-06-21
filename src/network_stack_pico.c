@@ -516,14 +516,14 @@ network_stack_pico_socket_connect(
     Debug_LOG_DEBUG("[socket %d/%p] open connection to %s:%u ...",
                     handle, pico_socket, dstAddr->addr, dstAddr->port);
 
-    struct pico_ip4 dst;
-    if (pico_string_to_ipv4((char*)dstAddr->addr, &dst.addr) < 0)
+    uint32_t dst_addr;
+    if (pico_string_to_ipv4((char*)dstAddr->addr, &dst_addr) < 0)
     {
         Debug_LOG_ERROR("[socket %d/%p] pico_string_to_ipv4() failed translating name '%s'",
                         handle, pico_socket, dstAddr->addr);
         return OS_ERROR_INVALID_PARAMETER;
     }
-
+    struct pico_ip4 dst = { .addr = dst_addr };
     internal_network_stack_thread_safety_mutex_lock();
     int ret = pico_socket_connect(pico_socket, &dst, short_be(dstAddr->port));
     OS_Error_t err =  pico_err2os(pico_err);
@@ -562,14 +562,14 @@ network_stack_pico_socket_bind(
     Debug_LOG_INFO("[socket %d/%p] binding to port %d", handle, pico_socket,
                    localAddr->port);
 
-    struct pico_ip4 convertedAddr;
-    if (pico_string_to_ipv4((char*)localAddr->addr, &convertedAddr.addr) < 0)
+    uint32_t local_addr;
+    if (pico_string_to_ipv4((char*)localAddr->addr, &local_addr) < 0)
     {
         Debug_LOG_ERROR("[socket %d/%p] pico_string_to_ipv4() failed translating name '%s'",
                         handle, pico_socket, localAddr->addr);
         return OS_ERROR_INVALID_PARAMETER;
     }
-
+    struct pico_ip4 convertedAddr = { .addr = local_addr };
     uint16_t be_port = short_be(localAddr->port);
     internal_network_stack_thread_safety_mutex_lock();
     int ret = pico_socket_bind(pico_socket, &convertedAddr, &be_port);
@@ -901,8 +901,9 @@ network_stack_pico_socket_sendto(
 
     CHECK_DATAPORT_SIZE(socket->buf, len);
 
-    struct pico_ip4 dst = {};
-    pico_string_to_ipv4((char*)dstAddr->addr, &dst.addr);
+    uint32_t dst_addr;
+    pico_string_to_ipv4((char*)dstAddr->addr, &dst_addr);
+    struct pico_ip4 dst = { .addr = dst_addr };
     uint16_t dport = short_be(dstAddr->port);
 
     internal_network_stack_thread_safety_mutex_lock();
