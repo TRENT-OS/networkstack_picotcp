@@ -118,6 +118,7 @@ Timer_getTimeMs(void)
         ms = 0;
     }
 
+    Debug_LOG_DEBUG("TCP TIMESTAMP> Current ms counter is: %lu", ms);
     return ms;
 }
 

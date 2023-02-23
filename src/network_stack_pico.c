@@ -784,7 +784,7 @@ network_stack_pico_socket_write(
     OS_Error_t err = pico_err2os(pico_err);
     socket->current_error = err;
     internal_network_stack_thread_safety_mutex_unlock();
-
+    Debug_LOG_INFO("Executed camkes interface socket write function");
     if (ret < 0)
     {
         Debug_LOG_ERROR("[socket %d/%p] nw_socket_write() failed with error %d, translating to OS error %d (%s)",
@@ -1019,7 +1019,7 @@ network_stack_pico_socket_recvfrom(
         {
 #if (Debug_Config_LOG_LEVEL >= Debug_LOG_LEVEL_TRACE)
             Debug_LOG_TRACE(
-                "[socket %d/%p] read data length=%d, data follows below",
+                "[socket %d/%p] read data length=%zd, data follows below",
                 handle,
                 socket,
                 len);
