@@ -431,29 +431,26 @@ network_stack_pico_socket_create(
 
     Debug_LOG_INFO("[socket %d/%p] socket opened", handle, pico_socket);
 
-    helper_socket_set_option_int(
-        pico_socket,
-        PICO_TCP_NODELAY,
-        PICO_TCP_NAGLE_DISABLE);
+    if (socket_type == OS_SOCK_STREAM) // TCP socket
+    {
+        // number of probes for TCP keepalive
+        helper_socket_set_option_int(
+            pico_socket,
+            PICO_SOCKET_OPT_KEEPCNT,
+            PICO_TCP_KEEPALIVE_COUNT);
 
-    // number of probes for TCP keepalive
-    helper_socket_set_option_int(
-        pico_socket,
-        PICO_SOCKET_OPT_KEEPCNT,
-        PICO_TCP_KEEPALIVE_COUNT);
+        // timeout in ms for TCP keepalive probes
+        helper_socket_set_option_int(
+            pico_socket,
+            PICO_SOCKET_OPT_KEEPIDLE,
+            PICO_TCP_KEEPALIVE_PROBE_TIMEOUT);
 
-    // timeout in ms for TCP keepalive probes
-    helper_socket_set_option_int(
-        pico_socket,
-        PICO_SOCKET_OPT_KEEPIDLE,
-        PICO_TCP_KEEPALIVE_PROBE_TIMEOUT);
-
-    // timeout in ms for TCP keep alive retries
-    helper_socket_set_option_int(
-        pico_socket,
-        PICO_SOCKET_OPT_KEEPINTVL,
-        PICO_TCP_KEEPALIVE_RETRY_TIMEOUT);
-
+        // timeout in ms for TCP keep alive retries
+        helper_socket_set_option_int(
+            pico_socket,
+            PICO_SOCKET_OPT_KEEPINTVL,
+            PICO_TCP_KEEPALIVE_RETRY_TIMEOUT);
+    }
     return OS_SUCCESS;
 }
 
