@@ -513,8 +513,6 @@ reserve_handle(
 
     internal_socket_control_block_mutex_lock();
 
-    if (instance.clients[clientIndex].currentSocketsInUse >=
-        instance.clients[clientIndex].currentSocketsInUse);
 
     if (instance.clients[clientIndex].currentSocketsInUse >=
         instance.clients[clientIndex].socketQuota)
