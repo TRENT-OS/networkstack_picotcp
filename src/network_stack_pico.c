@@ -139,14 +139,25 @@ pico_err2str(
     return "PICO_ERR_???";
 }
 
+struct pico_stack *pico_stack_ctx = NULL; 
+
+OS_Error_t nw_pico_stack_init(void) {
+    return pico_stack_init(&pico_stack_ctx);
+}
+
+void nw_pico_stack_tick(void) {
+    pico_stack_tick(pico_stack_ctx);
+}
+
+
 NetworkStack_Interface_t
 network_stack_pico_get_config(void)
 {
     NetworkStack_Interface_t config;
 
     config.nic_init   = pico_nic_initialize;
-    config.stack_init = pico_stack_init;
-    config.stack_tick = pico_stack_tick;
+    config.stack_init = nw_pico_stack_init;
+    config.stack_tick = nw_pico_stack_tick;
 
     return config;
 }
@@ -373,7 +384,7 @@ network_stack_pico_socket_create(
 
     internal_network_stack_thread_safety_mutex_lock();
     struct pico_socket* pico_socket =
-        pico_socket_open(pico_domain, pico_type, &handle_pico_socket_event);
+        pico_socket_open(pico_stack_ctx, pico_domain, pico_type, &handle_pico_socket_event);
     pico_err_t cur_pico_err = pico_err;
     internal_network_stack_thread_safety_mutex_unlock();
     if (NULL == pico_socket)

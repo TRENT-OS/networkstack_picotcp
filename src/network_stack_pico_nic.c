@@ -228,7 +228,7 @@ pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
                    mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );
 
     static const char* drv_name  = "trentos_nic_driver";
-    ret = pico_device_init(dev, drv_name, mac);
+    ret = pico_device_init(pico_stack_ctx, dev, drv_name, mac);
     if (ret != 0)
     {
         Debug_LOG_ERROR("pico_device_init() failed, error %d", ret);
@@ -275,6 +275,7 @@ pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
 
     // assign IP address and netmask
     ret = pico_ipv4_link_add(
+            pico_stack_ctx,
             dev,
             (struct pico_ip4){ .addr = ip_addr },
             (struct pico_ip4){ .addr = netmask_addr });
@@ -287,6 +288,7 @@ pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
 
     // add default route via gateway
     ret = pico_ipv4_route_add(
+            pico_stack_ctx,
             (struct pico_ip4){ .addr = 0 }, /* any address */
             (struct pico_ip4){ .addr = 0 }, /* no netmask */
             (struct pico_ip4){ .addr = gateway_addr },

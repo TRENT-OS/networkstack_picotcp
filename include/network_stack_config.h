@@ -152,3 +152,5 @@ void internal_socket_control_block_mutex_unlock(void);
 
 void internal_network_stack_thread_safety_mutex_lock(void);
 void internal_network_stack_thread_safety_mutex_unlock(void);
+
+extern struct pico_stack *pico_stack_ctx;
