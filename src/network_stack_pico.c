@@ -386,9 +386,9 @@ network_stack_pico_socket_create(
     struct pico_socket* pico_socket =
         pico_socket_open(pico_stack_ctx, pico_domain, pico_type, &handle_pico_socket_event);
     pico_err_t cur_pico_err = pico_err;
-    internal_network_stack_thread_safety_mutex_unlock();
     if (NULL == pico_socket)
     {
+        internal_network_stack_thread_safety_mutex_unlock();
         // try to detailed error from picoTCP. Actually, nw_socket_open()
         // should return a proper error code and populate a handle passed as
         // pointer parameter, so we don't need to access pico_err here.
@@ -409,12 +409,10 @@ network_stack_pico_socket_create(
 
     if (handle == -1)
     {
-        internal_network_stack_thread_safety_mutex_lock();
         if (pico_socket_close(pico_socket) != 0)
         {
             cur_pico_err = pico_err;
         }
-        internal_network_stack_thread_safety_mutex_unlock();
 
         internal_notify_main_loop();
 
@@ -424,6 +422,7 @@ network_stack_pico_socket_create(
                             cur_pico_err, pico_err2str(cur_pico_err));
         }
         Debug_LOG_ERROR("No free socket could be found");
+        internal_network_stack_thread_safety_mutex_unlock();
         return OS_ERROR_INSUFFICIENT_SPACE;
     }
 
@@ -465,6 +464,7 @@ network_stack_pico_socket_create(
         PICO_SOCKET_OPT_KEEPINTVL,
         PICO_TCP_KEEPALIVE_RETRY_TIMEOUT);
 
+    internal_network_stack_thread_safety_mutex_unlock();
     return OS_SUCCESS;
 }
 
