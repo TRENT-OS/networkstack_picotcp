@@ -90,6 +90,7 @@ struct NetworkStack_Config {
         control; \
         \
         consumes  EventDataAvailable    event_tick_or_data; \
+        emits     EventDataAvailable    event_send; \
         emits     EventDataAvailable    event_internal; \
         has       mutex                 allocatorMutex; \
         has       mutex                 nwstackMutex; \
@@ -176,6 +177,7 @@ struct NetworkStack_Config {
         nic, \
         inst, \
         nic, \
+        event_send, \
         event_tick_or_data)
 
 /**

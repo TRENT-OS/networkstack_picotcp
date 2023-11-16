@@ -12,15 +12,45 @@
 #include "network/OS_NetworkStackTypes.h"
 #include "network/OS_SocketTypes.h"
 
+#include "network_stack_core.h"
 #include "network_stack_config.h"
 #include "pico_device.h"
 #include "pico_stack.h"
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
+
+// The dataport include defines a separate PACKED
+#undef PACKED
+#include <camkes/dataport.h>
+
+#define ENCODE_DMA_ADDRESS(buf) ({ \
+    dataport_ptr_t wrapped_ptr = dataport_wrap_ptr(buf); \
+    assert(wrapped_ptr.id < (1 << 8) && wrapped_ptr.offset < (1 << 24)); \
+    void *new_buf = (void *)(((uintptr_t)wrapped_ptr.id << 24) | ((uintptr_t)wrapped_ptr.offset)); \
+    new_buf; })
+
+#define DECODE_DMA_ADDRESS(buf) ({\
+    dataport_ptr_t wrapped_ptr = {.id = ((uintptr_t)buf >> 24), .offset = (uintptr_t)buf & MASK(24)}; \
+    void *ptr = dataport_unwrap_ptr(wrapped_ptr); \
+    ptr; })
 
 // currently we support only one NIC
 static struct pico_device os_nic;
+
+#define RX_ROBJ_QUEUE_LEN 256
+
+typedef struct {
+    virtqueue_ring_object_t buf[RX_ROBJ_QUEUE_LEN];
+    size_t head;
+    size_t len;
+} rx_robj_queue_t;
+
+static rx_robj_queue_t rx_robj_queue = {
+    .head = 0,
+    .len = 0,
+};
 
 //------------------------------------------------------------------------------
 // Called by picoTCP to send one frame
@@ -28,62 +58,70 @@ static int
 nic_send_frame(
     struct pico_device* dev,
     void*               buf,
-    int                 len)
+    int                 buf_len)
 {
     // currently we support only one NIC
-    Debug_ASSERT( &os_nic == dev );
+    Debug_ASSERT(&os_nic == dev);
 
-    const OS_Dataport_t* nic_in = get_nic_port_to();
-    void* wrbuf = OS_Dataport_getBuf(*nic_in);
-    if (OS_Dataport_getSize(*nic_in) < len)
+    virtqueue_device_t* vq_send = get_send_virtqueue();
+    virtqueue_ring_object_t robj;
+    int ok = virtqueue_get_available_buf(vq_send, &robj);
+    if (!ok)
     {
-        Debug_LOG_ERROR("Buffer doesn't fit in dataport");
+        Debug_LOG_DEBUG("Send virtqueue: Not enough data in available, retrying.");
         return -1;
     }
 
-    // copy data into shared buffer and call driver
-    memcpy(wrbuf, buf, len);
-    size_t wr_len = len;
-    OS_Error_t err = nic_dev_write(&wr_len);
-
-    if (OS_SUCCESS != err)
+    void* dma_addr;
+    unsigned int out_len;
+    vq_flags_t flag;
+    ok = virtqueue_gather_available(vq_send, &robj, &dma_addr, &out_len, &flag);
+    if (!ok)
     {
-        switch (err)
-        {
-        case OS_ERROR_TRY_AGAIN:
-            Debug_LOG_WARNING("Send frame couldn't complete. Retrying");
-            // returning 0 tells picoTCP to retry sending the current frame
-            return 0;
+        Debug_LOG_ERROR("Send virtqueue: available empty");
+        return -1;
+    }
+    void* out_buf = DECODE_DMA_ADDRESS(dma_addr);
 
-        case OS_ERROR_INVALID_PARAMETER:
-            Debug_LOG_ERROR("Invalid frame size");
-            return -1;
-
-        case OS_ERROR_NOT_INITIALIZED:
-            Debug_LOG_ERROR("NIC not initialized");
-            return -1;
-
-        default:
-            break;
-        }
-
-        Debug_LOG_ERROR("nic_dev_write() failed, wr_len %zu, error %d",
-                        wr_len, err);
+    if (buf_len > out_len)
+    {
+        Debug_LOG_ERROR("Send buffer too small");
         return -1;
     }
 
-    // sending was successful, do a sanity check that the whole frame was sent.
-    if (wr_len != len)
+    memcpy(out_buf, buf, buf_len);
+    ok = virtqueue_add_used_buf(vq_send, &robj, buf_len);
+    if (!ok)
     {
-        // this should not happen, maybe the frame is corrupt?
-        Debug_LOG_ERROR("unexpected mismatch: len %d, wr_len %zu", len, wr_len);
-        Debug_DUMP_ERROR(buf, len);
-        Debug_ASSERT(0); // halt in debug builds
+        Debug_LOG_DEBUG("Send virtqueue, used full");
+        return -1;
     }
 
-    return len;
+    nic_dev_notify_send();
+    return buf_len;
 }
 
+//------------------------------------------------------------------------------
+static void
+nic_recv_free(
+    uint8_t* buf)
+{
+    if (rx_robj_queue.len == 0) {
+        Debug_LOG_ERROR("Receive ring object queue is empty, can't free buffer");
+        return;
+    }
+    // Dequeue ring object.
+    virtqueue_ring_object_t robj = rx_robj_queue.buf[rx_robj_queue.head];
+    rx_robj_queue.head = (rx_robj_queue.head + 1) % RX_ROBJ_QUEUE_LEN;
+    --rx_robj_queue.len;
+
+    virtqueue_device_t* vq_recv = get_recv_virtqueue();
+    int ok = virtqueue_add_used_buf(vq_recv, &robj, 0 /* length doesn't really matter */);
+    if (!ok) {
+        Debug_LOG_ERROR("Receive virtqueue: used empty");
+        return;
+    }
+}
 
 //------------------------------------------------------------------------------
 // Called after notification from driver and regularly from picoTCP stack tick
@@ -95,94 +133,49 @@ nic_poll_data(
     // currently we support only one NIC
     Debug_ASSERT(&os_nic == dev);
 
-    static bool isLegacyInterface = false;
-    static bool isDetectionDone   = false;
-
-    const OS_Dataport_t*        nw_in = get_nic_port_from();
-    OS_NetworkStack_RxBuffer_t* buf_ptr =
-        (OS_NetworkStack_RxBuffer_t*)OS_Dataport_getBuf(*nw_in);
-
-    if (isLegacyInterface == false)
+    virtqueue_device_t* vq_recv = get_recv_virtqueue();
+    virtqueue_ring_object_t robj;
+    while (loop_score > 0)
     {
-        size_t len;
-        size_t framesRemaining = 1;
-
-        while (loop_score > 0 && framesRemaining)
-        {
-            OS_Error_t status = nic_dev_read(&len, &framesRemaining);
-            // if the return code is NOT_IMPLEMENTED it means the driver implements
-            // the event based interface
-            if (status != OS_SUCCESS)
-            {
-                if (status == OS_ERROR_NOT_IMPLEMENTED)
-                {
-                    if (isDetectionDone == true)
-                    {
-                        // There is no return value we can give here which signals to the
-                        // picoTCP stack that an error ocurred. The loop value we return
-                        // here is fed to a LSFR to generate randomness.
-                        // Since this error should never happen we consider it fatal and stop
-                        // execution here.
-                        Debug_LOG_ERROR("Fatal error: RPC call returned not implemented.");
-                        exit(0);
-                    }
-                    isLegacyInterface = true;
-                    isDetectionDone   = true;
-                    Debug_LOG_INFO("Falling back to legacy interface.");
-                    break;
-                }
-                if (status == OS_ERROR_NOT_INITIALIZED)
-                {
-                    // Driver didn't finish initialization. Try again later.
-                    Debug_LOG_DEBUG("Nic not initialized. Retrying");
-                    break;
-                }
-                if (status == OS_ERROR_NO_DATA)
-                {
-                    Debug_LOG_TRACE("No data to be read");
-                    break;
-                }
-            }
-
-            Debug_LOG_TRACE("incoming frame len %zu", len);
-            pico_stack_recv(dev, (void*)buf_ptr, len);
-            loop_score--;
-            isDetectionDone = true;
+        int ok = virtqueue_get_available_buf(vq_recv, &robj);
+        if (!ok) {
+            return loop_score;
         }
 
-        if (loop_score == 0 && framesRemaining)
-        {
-            internal_notify_main_loop();
-            Debug_LOG_TRACE("Loop score is 0 but there is still data in the NIC");
+        void* buf;
+        unsigned int buf_len;
+        vq_flags_t flag;
+        ok = virtqueue_gather_available(vq_recv, &robj, &buf, &buf_len, &flag);
+        if (!ok) {
+            Debug_LOG_ERROR("Receive virtqueue: available empty");
+            return -1;
+        }
+        buf = DECODE_DMA_ADDRESS(buf);
+
+        if (rx_robj_queue.len == RX_ROBJ_QUEUE_LEN) {
+            Debug_LOG_ERROR("Receive ring object queue is full");
+            return -1;
+        }
+        // Enqueue ring object.
+        size_t idx = (rx_robj_queue.head + rx_robj_queue.len) % RX_ROBJ_QUEUE_LEN;
+        rx_robj_queue.buf[idx] = robj;
+        ++rx_robj_queue.len;
+
+        int ret = pico_stack_recv_zerocopy_ext_buffer_notify(dev, buf, buf_len, nic_recv_free);
+        if (ret <= 0) {
+            Debug_LOG_ERROR("pico_stack_recv_zerocopy_ext_buffer_notify() failed, error %d", ret);
+            return -1;
         }
 
+        --loop_score;
     }
-    if (isLegacyInterface == true)
-    {
-        static unsigned int pos = 0;
-        // loop_score indicates max number of frames that can be processed during
-        // the invocation of this poll.
-        if (loop_score > 0)
-        {
-            unsigned int ring_buffer_size = nw_in->size;
-            // As long as the loop score permits, take the next frame stored in the
-            // ring buffer.
-            while (buf_ptr[pos].len != 0 && loop_score > 0)
-            {
-                Debug_LOG_TRACE("incoming frame len %zu", buf_ptr[pos].len);
-                pico_stack_recv(dev, buf_ptr[pos].data, buf_ptr[pos].len);
-                loop_score--;
-                // set flag in shared memory that data has been read
-                buf_ptr[pos].len = 0;
-
-                pos = (pos + 1) % ring_buffer_size;
-            }
-        }
+    if (loop_score == 0 && VQ_DEV_POLL(vq_recv)) {
+        internal_notify_main_loop();
+        Debug_LOG_TRACE("Loop score is 0 but there is still data in the NIC");
     }
 
     return loop_score;
 }
-
 
 //------------------------------------------------------------------------------
 static void
@@ -190,11 +183,10 @@ nic_destroy(
     struct pico_device* dev)
 {
     // currently we support only one NIC
-    Debug_ASSERT( &os_nic == dev );
+    Debug_ASSERT(&os_nic == dev);
 
     memset(dev, 0, sizeof(*dev));
 }
-
 
 //------------------------------------------------------------------------------
 OS_Error_t
@@ -213,18 +205,14 @@ pico_nic_initialize(const OS_NetworkStack_AddressConfig_t* config)
 
     //---------------------------------------------------------------
     // get MAC from NIC driver
-    OS_Error_t err = nic_dev_get_mac_address();
+    uint8_t mac[6];
+    OS_Error_t err = nic_dev_get_mac_address(mac);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("nic_dev_get_mac_address() failed, error %d", err);
         nic_destroy(dev);
         return OS_ERROR_GENERIC;
     }
-
-    const OS_Dataport_t* nw_in = get_nic_port_from();
-    OS_NetworkStack_RxBuffer_t* nw_rx = (OS_NetworkStack_RxBuffer_t*)
-                                        OS_Dataport_getBuf(*nw_in);
-    uint8_t* mac = nw_rx->data;
 
     Debug_LOG_INFO("MAC: %02x:%02x:%02x:%02x:%02x:%02x",
                    mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );

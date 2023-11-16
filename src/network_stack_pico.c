@@ -26,6 +26,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+struct pico_stack *pico_stack_ctx = NULL;
+
 //------------------------------------------------------------------------------
 static OS_Error_t
 pico_err2os(
@@ -141,17 +143,19 @@ pico_err2str(
     return "PICO_ERR_???";
 }
 
-struct pico_stack *pico_stack_ctx = NULL; 
-
-OS_Error_t nw_pico_stack_init(void) {
+//------------------------------------------------------------------------------
+static OS_Error_t
+nw_pico_stack_init(void) {
     return pico_stack_init(&pico_stack_ctx);
 }
 
-void nw_pico_stack_tick(void) {
+//------------------------------------------------------------------------------
+static void
+nw_pico_stack_tick(void) {
     pico_stack_tick(pico_stack_ctx);
 }
 
-
+//------------------------------------------------------------------------------
 NetworkStack_Interface_t
 network_stack_pico_get_config(void)
 {

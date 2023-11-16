@@ -125,10 +125,6 @@ set_parent_handle(
     const int handle,
     const int accepted_handle);
 
-const OS_Dataport_t*
-get_dataport_for_handle(
-    const int handle);
-
 int
 get_client_id(void);
 
@@ -137,6 +133,12 @@ get_client_id_buf(void);
 
 int
 get_client_id_buf_size(void);
+
+virtqueue_device_t*
+get_send_virtqueue(void);
+
+virtqueue_device_t*
+get_recv_virtqueue(void);
 
 OS_Error_t
 NetworkStack_init(

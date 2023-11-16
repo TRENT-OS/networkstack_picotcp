@@ -633,17 +633,15 @@ set_parent_handle(
 }
 
 //------------------------------------------------------------------------------
-// get dataport for handle
-const OS_Dataport_t*
-get_dataport_for_handle(
-    const int handle)
-{
-    if (handle < 0 || handle >= instance.number_of_sockets)
-    {
-        Debug_LOG_ERROR("get_dataport_for_handle: Invalid handle");
-        return NULL;
-    }
-    return &(instance.sockets[handle].buf);
+inline virtqueue_device_t*
+get_send_virtqueue(void) {
+    return &instance.vq_send;
+}
+
+//------------------------------------------------------------------------------
+inline virtqueue_device_t*
+get_recv_virtqueue(void) {
+    return &instance.vq_recv;
 }
 
 //------------------------------------------------------------------------------
@@ -701,6 +699,17 @@ NetworkStack_init(
     {
         Debug_LOG_ERROR("%s: cannot accept NULL arguments", __func__);
         return OS_ERROR_INVALID_PARAMETER;
+    }
+
+    int ret = camkes_virtqueue_device_init(&instance.vq_send, camkes_virtqueue_get_id_from_name("nic_send"));
+    if (ret) {
+        Debug_LOG_ERROR("Failed to initialize send virtqueue");
+        return OS_ERROR_ABORTED;
+    }
+    ret = camkes_virtqueue_device_init(&instance.vq_recv, camkes_virtqueue_get_id_from_name("nic_recv"));
+    if (ret) {
+        Debug_LOG_ERROR("Failed to initialize receive virtqueue");
+        return OS_ERROR_ABORTED;
     }
 
     instance.camkes_cfg = camkes_config;

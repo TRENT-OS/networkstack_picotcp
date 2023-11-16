@@ -16,6 +16,8 @@
 
 #include <stddef.h>
 
+#include <camkes/virtqueue.h>
+
 typedef OS_Error_t (*nic_initialize_func_t)(
     const OS_NetworkStack_AddressConfig_t* config);
 typedef OS_Error_t (*stack_initialize_func_t)(void);
@@ -93,14 +95,11 @@ typedef struct
 
     struct
     {
-        OS_Dataport_t from; // NIC -> stack
-        OS_Dataport_t to;   // stack -> NIC
+        event_notify_func_t notify_send;
+
         struct
         {
-            OS_Error_t (*dev_read)(size_t* len, size_t* frames_available);
-            OS_Error_t (*dev_write)(size_t* len);
-            OS_Error_t (*get_mac)(void);
-            // API extension: OS_Error_t (*get_link_state)(void);
+            OS_Error_t (*get_mac_address)(uint64_t* mac);
         } rpc;
     } drv_nic;
 
@@ -122,6 +121,9 @@ typedef struct
 
     int number_of_sockets;
     int number_of_clients;
+
+    virtqueue_device_t vq_send;
+    virtqueue_device_t vq_recv;
 } NetworkStack_t;
 
 const NetworkStack_CamkesConfig_t* config_get_handlers(void);
@@ -134,20 +136,11 @@ void wait_network_event(void);
 
 void internal_notify_main_loop(void);
 
-const OS_Dataport_t* get_nic_port_from(void);
-const OS_Dataport_t* get_nic_port_to(void);
-
 OS_Error_t
-nic_dev_read(
-    size_t* pLen,
-    size_t* frameRemaining);
+nic_dev_get_mac_address(
+    uint8_t* buf);
 
-OS_Error_t
-nic_dev_write(
-    size_t* pLen);
-
-OS_Error_t
-nic_dev_get_mac_address(void);
+void nic_dev_notify_send(void);
 
 void internal_socket_control_block_mutex_lock(void);
 void internal_socket_control_block_mutex_unlock(void);

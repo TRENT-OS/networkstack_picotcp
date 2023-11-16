@@ -53,78 +53,48 @@ internal_notify_main_loop(void)
     do_notify();
 }
 
-
-//------------------------------------------------------------------------------
-const OS_Dataport_t*
-get_nic_port_from(void)
-{
-    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
-
-    // network stack -> driver (aka output)
-    const OS_Dataport_t* port = &(handlers->drv_nic.from);
-
-    Debug_ASSERT( NULL != port );
-    Debug_ASSERT( NULL != port->io );
-    Debug_ASSERT( 0 != port->size );
-
-    return port;
-}
-
-
-//------------------------------------------------------------------------------
-const OS_Dataport_t*
-get_nic_port_to(void)
-{
-    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
-
-    // driver -> network stack (aka input)
-    const OS_Dataport_t* port = &(handlers->drv_nic.to);
-
-    Debug_ASSERT( NULL != port );
-    Debug_ASSERT( NULL != port->io );
-    Debug_ASSERT( 0 != port->size );
-
-    return port;
-}
-
 //------------------------------------------------------------------------------
 OS_Error_t
-nic_dev_read(
-    size_t* pLen,
-    size_t* frameRemaining)
+nic_dev_get_mac_address(
+    uint8_t* buf)
 {
     const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
-    Debug_ASSERT( NULL != handlers->drv_nic.rpc.dev_read );
+    Debug_ASSERT( NULL != handlers->drv_nic.rpc.get_mac_address );
 
-    return handlers->drv_nic.rpc.dev_read(pLen, frameRemaining);
+    uint64_t mac;
+    OS_Error_t err = handlers->drv_nic.rpc.get_mac_address(&mac);
+    if (err != OS_SUCCESS)
+    {
+        return err;
+    }
+
+    // Big endian integer 0x0000aabbccddeeff to MAC string aa:bb:cc:dd:ee:ff
+    for (int i = 5; i >= 0; i--)
+    {
+        buf[i] = (uint8_t)mac;
+        mac >>= 8;
+    }
+    return OS_SUCCESS;
 }
-
 
 //------------------------------------------------------------------------------
-OS_Error_t
-nic_dev_write(
-    size_t* pLen)
+void
+nic_dev_notify_send(void)
 {
+    Debug_LOG_TRACE("nic_dev_notify_send for handle");
+
     const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
 
-    Debug_ASSERT( NULL != handlers->drv_nic.rpc.dev_write );
+    event_notify_func_t do_notify = handlers->drv_nic.notify_send;
+    if (!do_notify)
+    {
+        Debug_LOG_WARNING("drv_nic.notify_send not set");
+        return;
+    }
 
-    return handlers->drv_nic.rpc.dev_write(pLen);
+    do_notify();
 }
-
-
-//------------------------------------------------------------------------------
-OS_Error_t
-nic_dev_get_mac_address(void)
-{
-    const NetworkStack_CamkesConfig_t* handlers = config_get_handlers();
-
-    Debug_ASSERT( NULL != handlers->drv_nic.rpc.get_mac );
-
-    return handlers->drv_nic.rpc.get_mac();
-}
-
 
 //------------------------------------------------------------------------------
 void

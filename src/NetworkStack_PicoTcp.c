@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include <camkes.h>
+#include <camkes/virtqueue.h>
 
 // In its current implementation, the component supports a maximum of 8 clients
 // to be connected to it.
@@ -275,14 +276,11 @@ initializeNetworkStack(void)
 
         .drv_nic =
         {
-            .from = OS_DATAPORT_ASSIGN_SIZE(nic_from_port, NIC_DRIVER_RINGBUFFER_NUMBER_ELEMENTS),
-            .to   = OS_DATAPORT_ASSIGN(nic_to_port),
+            .notify_send = event_send_emit,
 
             .rpc =
             {
-                .dev_read       = nic_rpc_rx_data,
-                .dev_write      = nic_rpc_tx_data,
-                .get_mac        = nic_rpc_get_mac_address,
+                .get_mac_address = nic_rpc_get_mac_address,
             }
         }
     };
