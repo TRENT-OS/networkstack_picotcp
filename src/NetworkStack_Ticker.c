@@ -1,7 +1,9 @@
 /*
- *  Network Stack Internal Ticker
+ * Network Stack Internal Ticker
  *
- *  Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
+ * Copyright (C) 2019-2024, HENSOLDT Cyber GmbH
+ * 
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 #include "lib_debug/Debug.h"

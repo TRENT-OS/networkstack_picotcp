@@ -1,7 +1,9 @@
 /*
  * Network Stack picoTCP wrapper
  *
- * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
+ * Copyright (C) 2020-2024, HENSOLDT Cyber GmbH
+ * 
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 #include "network/OS_SocketTypes.h"
